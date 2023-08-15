@@ -101,6 +101,15 @@ The `DynamicPrompt` node generates prompts by combining a fixed prompt with a ra
 
 The node returns the generated prompt, which is a combination of the fixed prompt and selected random tags.
 
-## Example Usage
+#### Example Usage
 
 - Just fill the `variable_prompt` field with tag comma separated, the `fixed_prompt` is optional
+
+
+## Contributing
+
+Feel free to contribute to this project by reporting issues or suggesting improvements. Open an issue or submit a pull request on the GitHub repository.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

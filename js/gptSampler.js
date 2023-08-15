@@ -2,14 +2,13 @@ import { app } from "/scripts/app.js";
 import { ComfyWidgets } from "/scripts/widgets.js";
 
 app.registerExtension({
-	name: "n.DynamicPrompt",
+	name: "n.GPTSampler",
 	async beforeRegisterNodeDef(nodeType, nodeData, app) {
 		
-		if (nodeData.name === "DynamicPrompt") {
-			console.warn("DynamicPrompt detected")
+		if (nodeData.name === "GPTSampler") {
+			console.warn("GPTSampler detected")
 			
 			const onExecuted = nodeType.prototype.onExecuted;
-
 	
 			nodeType.prototype.onExecuted = function (message) {
 				onExecuted?.apply(this, arguments);

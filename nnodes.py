@@ -56,7 +56,7 @@ def get_comfy_dir(subpath=None, mkdir=False):
 def get_web_ext_dir():
     config = get_extension_config()
     name = config["name"]
-    dir = get_comfy_dir("web/extensions/confyui-n-nodes")
+    dir = get_comfy_dir("web/extensions/comfyui-n-nodes")
     if not os.path.exists(dir):
         os.makedirs(dir)
     dir = os.path.join(dir, name)

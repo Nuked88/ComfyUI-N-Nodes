@@ -73,16 +73,8 @@ class StringVariable:
     
     @classmethod
     def INPUT_TYPES(s):
-        
-        return {
-            "required": {
-                "value": ("STRING", {
-                    "default": ""
+        return {"required": {"value": ("STRING", {"multiline": True})}}
 
-                }),
-                
-            },
-        }
 
     RETURN_TYPES = ("STRING",)
     FUNCTION = "check"

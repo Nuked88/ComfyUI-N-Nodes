@@ -1,4 +1,4 @@
-
+@echo off
 
 SET CMAKE_ARGS=-DLLAMA_CUBLAS=on
 SET FORCE_CMAKE=1 

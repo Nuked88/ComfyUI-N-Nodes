@@ -7,7 +7,7 @@ A suite of custom nodes for ComfyUI, for now i just put Integer, string and floa
 `git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
 to your ComfyUI `custom_nodes` directory
 
-2. **IMPORTANT**: For the GPT node you need to run **install_dependency.bat** but since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have CUDA and visual studio (in the case of my bat) installed to compile it. For details and the full guide you can go [here](https://github.com/abetlen/llama-cpp-python)
+2. **IMPORTANT**: For the GPT node you need to run **install_dependency.bat** and since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python) . This bat is made for the official portable windows version of ComfyUI
 
    ComfyUI will then automatically load all custom scripts and nodes at the start.  
 

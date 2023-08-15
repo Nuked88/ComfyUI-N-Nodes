@@ -1,10 +1,10 @@
-# ConfyUI-N-Nodes
-A suite of custom nodes for ConfyUI, for now i just put Integer, string and float variable nodes
+# ComfyUI-N-Nodes
+A suite of custom nodes for ComfyUI, for now i just put Integer, string and float variable nodes
 
 # Installation
 
 1. Clone the repository:
-`git clone https://github.com/Nuked88/ConfyUI-N-Nodes.git`  
+`git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
 to your ComfyUI `custom_nodes` directory
 
    ComfyUI will then automatically load all custom scripts and nodes at the start.  
@@ -14,7 +14,7 @@ to your ComfyUI `custom_nodes` directory
   - Delete the cloned repo in `custom_nodes`
 
 # Update
-1. Navigate to the cloned repo e.g. `custom_nodes/ConfyUI-N-Nodes`
+1. Navigate to the cloned repo e.g. `custom_nodes/ComfyUI-N-Nodes`
 2. `git pull`
 
 # Features

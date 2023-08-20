@@ -53,6 +53,7 @@ class GPTLoaderSimple:
 
 
 class GPTSampler:
+    
     """
     A custom node for text generation using GPT
 
@@ -73,6 +74,7 @@ class GPTSampler:
     model (`str`): The GPT model to use for text generation.
     """
     def __init__(self):
+        self.temp_prompt = ""
         pass
     
     @classmethod
@@ -81,8 +83,8 @@ class GPTSampler:
             "required": {
                 "prompt": ("STRING",{"forceInput": True} ),
                 "model": ("CUSTOM", {"default": ""}),
-                "model_path": ("STRING", {"default": ""}),
-                "max_tokens": ("INT", {"default": 128}),
+                "model_path": ("STRING", {"default": "","forceInput": True}),
+                "max_tokens": ("INT", {"default": 2048}),
                 "temperature": ("FLOAT", {"default": 0.7, "min": 0.2, "max": 1.0}),
                 "top_p": ("FLOAT", {"default": 0.5, "min": 0.1, "max": 1.0}),
                 "logprobs": ("INT", {"default": 0}),
@@ -106,21 +108,29 @@ class GPTSampler:
     CATEGORY = "sampling"
 
     def generate_text(self,prompt, max_tokens, temperature, top_p, logprobs, echo, stop_token, frequency_penalty, presence_penalty, repeat_penalty, top_k, tfs_z, model,model_path,print_output,cached,prefix,suffix):
-        # Call your GPT generation function here using the provided parameters
-        composed_prompt = f"{prefix} {prompt} {suffix}"
-        cont =""
-        stream = model( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,temperature=temperature,top_k=top_k,top_p=top_p,model=model_path,prompt=composed_prompt)
-        print(len(stream))
-        print(stream)
-        cont= stream["choices"][0]["text"]
         
+        
+        if cached == "NO":
+            # Call your GPT generation function here using the provided parameters
+            composed_prompt = f"{prefix} {prompt} {suffix}"
+            cont =""
+            stream = model( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,temperature=temperature,top_k=top_k,top_p=top_p,model=model_path,prompt=composed_prompt)
+            print(len(stream))
+            print(stream)
+            cont= stream["choices"][0]["text"]
+            self.temp_prompt  = cont
+        else:
+            cont = self.temp_prompt 
         #remove fist 30 characters of cont
-        
-        if print_output == "enable":
-            print(f"Input: {prompt}\nGenerated Text: {cont}")
-        return {"ui": {"text": cont}, "result": (cont,)}
+        try:
+            if print_output == "enable":
+                print(f"Input: {prompt}\nGenerated Text: {cont}")
+            return {"ui": {"text": cont}, "result": (cont,)}
 
-
+        except:
+            if print_output == "enable":
+                print(f"Input: {prompt}\nGenerated Text: ")
+            return {"ui": {"text": " "}, "result": (" ",)}
 
 
 

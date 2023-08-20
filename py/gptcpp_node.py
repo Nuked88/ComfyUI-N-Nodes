@@ -97,8 +97,8 @@ class GPTSampler:
                 "tfs_z": ("FLOAT", {"default": 1.0}),
                 "print_output": (["enable", "disable"], {"default": "disable"}),
                 "cached": (_choice,{"default": "NO"} ),
-                "prefix": ("STRING", {"default": "### Instruction"}),
-                "suffix": ("STRING", {"default": "### Response:"}),
+                "prefix": ("STRING", {"default": "### Instruction: "}),
+                "suffix": ("STRING", {"default": "### Response: "}),
                 
             }
         }

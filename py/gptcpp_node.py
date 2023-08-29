@@ -13,7 +13,7 @@ def env_or_def(env, default):
 	return default
 
 
-supported_gpt_extensions = set([ '.bin'])
+supported_gpt_extensions = set([ '.bin','.gguf'])
 
 
 

@@ -7,9 +7,10 @@ xcopy "%CUDA_PATH%\extras\visual_studio_integration\MSBuildExtensions\" "C:\Prog
 
 
 cd %~dp0
+git pull
 cd ../../../python_embeded
 
 python.exe -s -m pip install scikit-build
 python.exe -s -m pip install cmake
-python.exe -s -m pip install llama-cpp-python
+python.exe -s -m pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
 PAUSE

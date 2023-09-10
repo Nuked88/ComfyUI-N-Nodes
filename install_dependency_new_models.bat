@@ -13,4 +13,6 @@ cd ../../../python_embeded
 python.exe -s -m pip install scikit-build
 python.exe -s -m pip install cmake
 python.exe -s -m pip install llama-cpp-python --force-reinstall --upgrade --no-cache-dir
+
+
 PAUSE

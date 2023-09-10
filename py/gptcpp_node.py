@@ -47,7 +47,7 @@ class GPTLoaderSimple:
     print()
     def load_gpt_checkpoint(self, ckpt_name, gpu_layers,n_threads,max_ctx):
         ckpt_path = folder_paths.get_full_path("GPTcheckpoints", ckpt_name)
-        llm = Llama(model_path=ckpt_path,n_gpu_layers=gpu_layers,verbose=False,n_threads=n_threads, n_ctx=4000, )
+        llm = Llama(model_path=ckpt_path,n_gpu_layers=gpu_layers,verbose=False,n_threads=n_threads, n_ctx=max_ctx, )
 
         return llm, ckpt_path
 

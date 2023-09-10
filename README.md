@@ -7,13 +7,16 @@ A suite of custom nodes for ComfyUI, for now i just put Integer, string and floa
 `git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
 to your ComfyUI `custom_nodes` directory
 
-2. **IMPORTANT**: For the GPT node you need to run **install_dependency.bat** and since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python) . This bat is made for the official portable windows version of ComfyUI
+2. **IMPORTANT**: For the GPT node you need to run **install_dependency bat file**. 
+There are 2 versions: ***install_dependency_ggml_models.bat*** for the old ggmlv3 models and ***install_dependency_new_models.bat*** for all the new models (GGUF).
+YOU CAN ONLY USE ONE OF THEM AT A TIME!
+Since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python) . This bats are made for the official portable windows version of ComfyUI
 
    ComfyUI will then automatically load all custom scripts and nodes at the start.  
 
 
 - For uninstallation:
-  - Delete the cloned repo in `custom_nodes`
+  - Delete the `ComfyUI-N-Nodes` folder in `custom_nodes`
 
 
 # Update
@@ -37,7 +40,7 @@ These custom nodes are designed to enhance the capabilities of the ConfyUI frame
 You can add in the _extra_model_paths.yaml_ the path where your model GPTQ are in this way (example):
 
 `other_ui:
-          base_path: I:\\temp3\\pygmaion\\text-generation-webui
+          base_path: I:\\text-generation-webui
           GPTcheckpoints: models/`
           
 Otherwise it will create a GPTcheckpoints folder in the model folder of ComfyUI where you can place your .bin models.

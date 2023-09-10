@@ -6,7 +6,7 @@ xcopy "%CUDA_PATH%\extras\visual_studio_integration\MSBuildExtensions\" "C:\Prog
 xcopy "%CUDA_PATH%\extras\visual_studio_integration\MSBuildExtensions\" "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Microsoft\VC\v160\BuildCustomizations\" /E /I /Y
 
 
-cd %~dp0
+cd /d %~dp0
 git pull
 cd ../../../python_embeded
 

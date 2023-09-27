@@ -8,9 +8,24 @@ from .nnodes import init, get_ext_dir
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
+def install_and_import(package):
+    import importlib
+    try:
+        print("Detected: ", package)
+        importlib.import_module(package)
+    except ImportError:
+        import pip
+        pip.main(['install', package])
+    finally:
+        globals()[package] = importlib.import_module(package)
+
+
+
+
 if init():
     py = get_ext_dir("py")
     files = glob.glob("*.py", root_dir=py, recursive=False)
+    install_and_import('moviepy')
     for file in files:
         name = os.path.splitext(file)[0]
         spec = importlib.util.spec_from_file_location(name, os.path.join(py, file))

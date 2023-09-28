@@ -60,11 +60,14 @@ app.registerExtension({
 
 		const onAdded = nodeType.prototype.onAdded;
 		if (nodeData.name === "VideoLoader") {
+
+
+
 		nodeType.prototype.onAdded = function () {
 			onAdded?.apply(this, arguments);
 			const temp_web_url = this.widgets.find((w) => w.name === "local_url");
 		
-		
+
 		setTimeout(() => {
 			ExtendedComfyWidgets["VIDEO"](this, "videoWidget", ["STRING"], temp_web_url.value, app);
 		}, 100); 

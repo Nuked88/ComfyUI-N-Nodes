@@ -4,53 +4,8 @@ import { ComfyWidgets } from "/scripts/widgets.js";
 
 const MultilineSymbol = Symbol();
 const MultilineResizeSymbol = Symbol();
-async function uploadFile(file, updateNode, node, pasted = false) {
-	const videoWidget = node.widgets.find((w) => w.name === "video");
-	
-
-	try {
-		// Wrap file in formdata so it includes filename
-		const body = new FormData();
-		body.append("image", file);
-		if (pasted) {
-			body.append("subfolder", "pasted");
-		}
-		else {
-			body.append("subfolder", "n-suite");
-		}
-	
-		const resp = await api.fetchApi("/upload/image", {
-			method: "POST",
-			body,
-		});
-
-		if (resp.status === 200) {
-			const data = await resp.json();
-			// Add the file to the dropdown list and update the widget value
-			let path = data.name;
-			
-
-			if (!videoWidget.options.values.includes(path)) {
-				videoWidget.options.values.push(path);
-			}
-			
-			if (updateNode) {
-		
-				videoWidget.value = path;
-				if (data.subfolder) path = data.subfolder + "/" + path;
-				showVideoInput(path,node);
-				
-			}
-		} else {
-			alert(resp.status + " - " + resp.statusText);
-		}
-	} catch (error) {
-		alert(error);
-	}
-}
 
 function addVideo(node, name,src, app) {
-	console.log(src)
 	const MIN_SIZE = 50;
 	function computeSize(size) {
 		try{
@@ -145,53 +100,25 @@ function addVideo(node, name,src, app) {
 			this.inputEl.hidden = !visible;
 		},
 	};
-	let type_file="mp4";
-	const regex = /\.gif&type/;
-
-	if (regex.test(src)) {
-		type_file="gif";
-	}
-
-	widget.inputEl = document.createElement("div");
-		Object.assign(widget.inputEl, {
-			id: "videoContainer",
-			width: 400,
-			height: 300
-		})
 
 
-	if (type_file=="gif"){
+	widget.inputEl = document.createElement("video");
+
+
+	// Set the video attributes
+	Object.assign(widget.inputEl, {
+		controls: true,
+		src: src,
+		poster: "",
+		width: 400,
+		height: 300,
+		loop: true,
+		muted: true,
+		autoplay:true,
+		type : "video/mp4"
 		
-		let img_element = document.createElement("img");
-		Object.assign(img_element, {
-			id:"mediaContainer",
-			src: src,
-			style: "width: 100%; height: 100%;",
-			type : "image/gif"
-		})
-
-		widget.inputEl.appendChild(img_element);
-	}
-	else{
-		let video_element = document.createElement("video");
-			// Set the video attributes
-		Object.assign(video_element, {
-			id:"mediaContainer",
-			controls: true,
-			src: src,
-			poster: "",
-			style: "width: 100%; height: 100%;",
-			loop: true,
-			muted: true,
-			autoplay:true,
-			type : "video/mp4"
-			
-		});
-		widget.inputEl.appendChild(video_element);
-	}
-
-
-	
+	});
+	widget.inputEl.classList.add("dididi");
 
 
 	
@@ -201,7 +128,7 @@ function addVideo(node, name,src, app) {
 
 
 	widget.parent = node;
-	//document.body.appendChild(widget.inputEl);
+	document.body.appendChild(widget.inputEl);
 
 	node.addCustomWidget(widget);
 
@@ -274,62 +201,7 @@ export function showVideoInput(name,node) {
 	}
 
 	let url_video = api.apiURL(`/view?filename=${encodeURIComponent(name)}&type=input&subfolder=${subfolder}${app.getPreviewFormatParam()}`);
-	
-
-	const regex = /\.gif&type/;
-
-	let prev_format = "mp4"
-	if (document.getElementById("mediaContainer").tagName=="IMG"){
-		prev_format="gif";
-	} 
-	let current_format = "mp4"
-	if (regex.test(url_video)){
-		current_format="gif";
-	}
-
-	if (prev_format == current_format) { 
-		//update
-		document.getElementById("mediaContainer").src = url_video
-	}
-	else{
-		let newElement;
-		if (current_format=="gif"){
-			
-			newElement = document.createElement("img");
-				Object.assign(newElement, {
-					id:"mediaContainer",
-					src: url_video,
-					style: "width: 100%; height: 100%;",
-					type : "image/gif"
-				})
-			}
-			else{
-				newElement = document.createElement("video");
-					// Set the video attributes
-				Object.assign(newElement, {
-					id:"mediaContainer",
-					controls: true,
-					src: url_video,
-					poster: "",
-					style: "width: 100%; height: 100%;",
-					loop: true,
-					muted: true,
-					autoplay:true,
-					type : "video/mp4"
-					
-				});
-			}
-		
-			
-			document.getElementById("videoContainer").replaceChild(newElement,document.getElementById("mediaContainer"));
-		
-		
-		
-
-
-	}
-	
-	
+	videoWidget.inputEl.src = url_video
 	temp_web_url.value = url_video
 }
 
@@ -359,7 +231,6 @@ export const ExtendedComfyWidgets = {
 	
 	VIDEO(node, inputName, inputData, src, app,type="input") {
 	try {	
-	
 		const videoWidget = node.widgets.find((w) => w.name === "video");
 		const defaultVal = "";
 		let res;
@@ -375,30 +246,7 @@ export const ExtendedComfyWidgets = {
 				}
 			};
 		}
-
-
-		if (node.type =="VideoLoader"){
-			// do this only on VideoLoad node!
-			let uploadWidget;
-			const fileInput = document.createElement("input");
-			Object.assign(fileInput, {
-				type: "file",
-				accept: "video/mp4,image/gif",
-				style: "display: none",
-				onchange: async () => {
-					if (fileInput.files.length) {
-						await uploadFile(fileInput.files[0], true,node);
-					}
-				},
-			});
-			document.body.append(fileInput);
-			// Create the button widget for selecting the files
-			uploadWidget = node.addWidget("button", "choose file to upload", "image", () => {
-				fileInput.click();
-			});
-			uploadWidget.serialize = false;
-
-	}
+	
 
 		return res;	
 	}

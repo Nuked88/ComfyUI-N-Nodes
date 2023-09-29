@@ -227,28 +227,18 @@ def extract_frames_from_video(video_path, output_folder, target_fps=30):
     return list_files
 
 
-def extract_frames_from_gif(gif_path, output_folder, target_fps=30):
-    list_files = []
+def extract_frames_from_gif(gif_path, output_folder):
     os.makedirs(output_folder, exist_ok=True)
-    real_frame_count = 0
-    metadata = imageio.v3.immeta(gif_path)
-
+    
     gif_frames = imageio.mimread(gif_path)
-    original_fps = len(gif_frames)
-    frame_skip_ratio = original_fps // original_fps
+    
     frame_count = 0
     for frame in gif_frames:
         frame_count += 1
+        frame_filename = os.path.join(output_folder, f"frame_{frame_count:04d}.png")
+        cv2.imwrite(frame_filename, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
-        if frame_count % frame_skip_ratio == 0:
-            frame_filename = os.path.join(output_folder, f"frame_{frame_count:04d}.png")
-            cv2.imwrite(frame_filename, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
-            list_files.append(frame_filename)
-            real_frame_count += 1
-    
     print(f"{frame_count} frames have been extracted from the GIF and saved in {output_folder}")
-    return list_files,metadata
-
 
 def get_output_filename(input_file_path, output_folder, file_extension,suffix="") :
     input_filename = os.path.basename(input_file_path)
@@ -294,14 +284,14 @@ def create_video_from_frames(frame_folder, output_video, frame_rate = 30.0):
     out.release()
     print(f"Frames have been successfully reassembled into {output_video}")
 
-def create_gif_from_frames(frame_folder, output_gif, metadata):
+def create_gif_from_frames(frame_folder, output_gif):
     frame_filenames = [os.path.join(frame_folder, filename) for filename in os.listdir(frame_folder) if filename.endswith(".png")]
     frame_filenames.sort()
 
     frames = [imageio.imread(frame_filename) for frame_filename in frame_filenames]
 
     # imageio
-    imageio.mimsave(output_gif, frames, loop=metadata[3], duration=metadata[4])  
+    imageio.mimsave(output_gif, frames, duration=0.1)  
 
 
     print(f"Frames have been successfully assembled into {output_gif}")
@@ -317,20 +307,20 @@ class VideoLoader:
     @classmethod
     def INPUT_TYPES(s):
         files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
-        return {"required": {"video": (sorted(files), {"image_upload": True} ), 
+        return {"required": {"video": (sorted(files), ), 
                             "local_url": ("STRING",  {"default": ""} ),  
                             "framerate": (_framerate, {"default": "original"} ), 
                             "resize_by": (_resize_type,{"default": "none"} ),
                               "size": ("INT", {"default": 512, "min": 512, "step": 64}),
                               "images_limit": ("INT", {"default": 0, "min": 0, "step": 1}),
-                              "batch_size": ("INT", {"default": 0, "min": 0, "step": 1})
-                          
+                              "batch_size": ("INT", {"default": 0, "min": 0, "step": 1}),
+                            
                             },}
 
 
     RETURN_TYPES = ("IMAGE","LATENT","STRING","INT","INT",)
     OUTPUT_IS_LIST = (True, True, False, False,False, )   
-    RETURN_NAMES = ("IMAGES","EMPTY LATENT","METADATA","WIDTH","HEIGHT")
+    RETURN_NAMES = ("IMAGES","LATENT","METADATA","WIDTH","HEIGHT")
     CATEGORY = "video"
     FUNCTION = "encode"
 
@@ -357,8 +347,8 @@ class VideoLoader:
             fps = int(cap.get(cv2.CAP_PROP_FPS))
             print(f"The video has {fps} frames per second.")
 
-        #shutil.rmtree(output_dir)
-        #print(f"Temporary folder {output_dir} has been emptied.")
+        shutil.rmtree(output_dir)
+        print(f"Temporary folder {output_dir} has been emptied.")
         
         #set new framerate
         
@@ -375,7 +365,6 @@ class VideoLoader:
 
         if file_extension == ".mp4":
             list_files = extract_frames_from_video(file_path, output_dir, target_fps=fps)
-            meta = {"loop": 0, "duration": 0}
 
             audio_clip = VideoFileClip(file_path).audio
             try:
@@ -384,16 +373,16 @@ class VideoLoader:
             except:
                 pass
 
-               
+            """        
         elif file_extension == ".gif":
-            list_files,meta = extract_frames_from_gif(file_path, output_dir)
+            extract_frames_from_gif(file_path, output_dir)
             #create_gif_from_frames(output_dir, output_video2)
-        
+            """
         else:
             print("Format not supported. Please provide an MP4 or GIF file.")
 
         
-        return list_files,fps,file_extension,meta["loop"],meta["duration"]
+        return list_files,fps
 
     def generate_latent(self, width, height, batch_size=1):
         latent = torch.zeros([batch_size, 4, height // 8, width // 8])
@@ -408,7 +397,7 @@ class VideoLoader:
     
     def encode(self,video,framerate, local_url, resize_by, size, images_limit,batch_size):
         metadata = []
-        FRAMES,fps,file_extension,loop,duration = self.load_video(video,framerate, local_url)
+        FRAMES,fps = self.load_video(video,framerate, local_url)
         pool_size=5
         t_list = []
         i_list = [] 
@@ -464,9 +453,6 @@ class VideoLoader:
         
         metadata.append(fps)
         metadata.append(b_size)
-        metadata.append(file_extension)
-        metadata.append(loop)
-        metadata.append(duration)
 
         if batch_size != 0:
             rebatcher = LatentRebatch()
@@ -488,7 +474,6 @@ class VideoSaver:
     @classmethod
     def INPUT_TYPES(s):
         s.video_file_path,s.video_filename = get_output_filename("video", videos_output_dir, ".mp4")
-        s.gif_file_path,s.gif_filename = get_output_filename("gif", videos_output_dir, ".gif")
         
         try:
             shutil.rmtree(frames_output_dir)
@@ -518,9 +503,6 @@ class VideoSaver:
        
         fps = METADATA[0]
         frame_number = METADATA[1]
-        file_extension = METADATA[2]
-  
-
         results = list()
         
         #full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path("", frames_output_dir, images[0].shape[1], images[0].shape[0])
@@ -547,42 +529,26 @@ class VideoSaver:
             file_name_number = 0
 
         if(file_name_number >= frame_number):
-            if file_extension == ".mp4":
-                create_video_from_frames(frames_output_dir, videos_output_temp_dir,frame_rate=fps)
-            
-                video_clip = VideoFileClip(videos_output_temp_dir)
-                try:
-                    audio_clip =  AudioFileClip(audios_output_temp_dir)
-                    video_clip = video_clip.set_audio(audio_clip)
-                except:
-                    pass
-                if SaveVideo == "Yes":
-                    video_clip.write_videofile(self.video_file_path)
-                    file_name = self.video_filename
-                else:
-                    #delete all temporary files that start with video_preview
-                    for file in os.listdir(video_preview_output_temp_dir):
-                        if file.startswith("video_preview"):
-                            os.remove(os.path.join(video_preview_output_temp_dir,file))
-                    #random number
-                    suffix = str(random.randint(1,100000))
-                    file_name = f"video_preview_{suffix}.mp4"
-                    video_clip.write_videofile(os.path.join(video_preview_output_temp_dir,file_name))
-            elif file_extension == ".gif":
-
-                if SaveVideo == "Yes":
-                    create_gif_from_frames(frames_output_dir, os.path.join(video_preview_output_temp_dir,self.gif_filename),METADATA)
-                    file_name = self.gif_filename
-                else:
-                    #delete all temporary files that start with video_preview
-                    for file in os.listdir(video_preview_output_temp_dir):
-                        if file.startswith("gif_preview"):
-                            os.remove(os.path.join(video_preview_output_temp_dir,file))
-                    #random number
-                    suffix = str(random.randint(1,100000))
-                    file_name = f"gif_preview_{suffix}.gif"
-                    create_gif_from_frames(frames_output_dir,os.path.join(video_preview_output_temp_dir,file_name),METADATA)
-                    
+            create_video_from_frames(frames_output_dir, videos_output_temp_dir,frame_rate=fps)
+        
+            video_clip = VideoFileClip(videos_output_temp_dir)
+            try:
+                audio_clip =  AudioFileClip(audios_output_temp_dir)
+                video_clip = video_clip.set_audio(audio_clip)
+            except:
+                pass
+            if SaveVideo == "Yes":
+                video_clip.write_videofile(self.video_file_path)
+                file_name = self.video_filename
+            else:
+                #delete all temporary files that start with video_preview
+                for file in os.listdir(video_preview_output_temp_dir):
+                    if file.startswith("video_preview"):
+                        os.remove(os.path.join(video_preview_output_temp_dir,file))
+                #random number
+                suffix = str(random.randint(1,100000))
+                file_name = f"video_preview_{suffix}.mp4"
+                video_clip.write_videofile(os.path.join(video_preview_output_temp_dir,file_name))
                 
           
 
@@ -597,21 +563,18 @@ class LoadFramesFromFolder:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "folder":("STRING",  {"default": ""} ),
-                             "fps":("INT", {"default": 30}),
-                             "loop_for_gif": ("INT", {"default": 0}),
-                             "duration_for_gif":("INT", {"default": 0}),
+                             "fps":("INT", {"default": 30})
+                             
                              
                              }}
     
 
     RETURN_TYPES = ("IMAGE","STRING",)
-    RETURN_NAMES = ("IMAGES","METADATA")
-  
     FUNCTION = "load_images"
     OUTPUT_IS_LIST = (True,False,)
     CATEGORY = "video"
 
-    def load_images(self, folder,fps,loop_for_gif,duration_for_gif):
+    def load_images(self, folder,fps):
         image_list = []
         METADATA = [fps, len(os.listdir(folder))]
         

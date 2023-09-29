@@ -613,7 +613,7 @@ class LoadFramesFromFolder:
 
     def load_images(self, folder,fps,loop_for_gif,duration_for_gif):
         image_list = []
-        METADATA = [fps, len(os.listdir(folder))]
+        METADATA = [fps, len(os.listdir(folder)),loop_for_gif,duration_for_gif]
         
         images = [os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(".png")]
         images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))

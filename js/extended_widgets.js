@@ -51,6 +51,7 @@ async function uploadFile(file, updateNode, node, pasted = false) {
 
 function addVideo(node, name,src, app) {
 	console.log(src)
+	
 	const MIN_SIZE = 50;
 	function computeSize(size) {
 		try{
@@ -264,7 +265,7 @@ function addVideo(node, name,src, app) {
 export function showVideoInput(name,node) {
 	const videoWidget = node.widgets.find((w) => w.name === "videoWidget");
 	const temp_web_url = node.widgets.find((w) => w.name === "local_url");
-	
+	///const videoContainer = videoWidget.inputEl.widgets.find((w) => w.name === "videoWidget");
 	
 	let folder_separator = name.lastIndexOf("/");
 	let subfolder = "n-suite";
@@ -289,7 +290,9 @@ export function showVideoInput(name,node) {
 
 	if (prev_format == current_format) { 
 		//update
-		document.getElementById("mediaContainer").src = url_video
+		
+		console.log(videoWidget.inputEl)//..getElementById("mediaContainer")
+		//videoWidget.inputEl.children[1].src = url_video
 	}
 	else{
 		let newElement;
@@ -319,9 +322,21 @@ export function showVideoInput(name,node) {
 					
 				});
 			}
+
+			let newEl= document.createElement("div");
+		Object.assign(newEl, {
+			id: "videoContainer",
+			width: 400,
+			height: 300
+		})
+
+		newEl.appendChild(newElement);
 		
-			
-			document.getElementById("videoContainer").replaceChild(newElement,document.getElementById("mediaContainer"));
+			videoWidget.lastChilds = newEl;
+			console.log(videoWidget)
+			console.log("ssssssssss")
+			//document.getElementById("videoContainer")
+			//videoWidget.inputEl.children[0].replaceChild(newElement,videoWidget.inputEl.children[1]);
 		
 		
 		
@@ -335,7 +350,7 @@ export function showVideoInput(name,node) {
 
 export function showVideoOutput(name,node) {
 	const videoWidget = node.widgets.find((w) => w.name === "videoOutWidget");
-
+	console.log(name)
 	
 	
 	let folder_separator = name.lastIndexOf("/");

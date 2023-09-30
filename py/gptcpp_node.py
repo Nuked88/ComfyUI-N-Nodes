@@ -106,7 +106,7 @@ class GPTSampler:
 
     RETURN_TYPES = ("STRING",)
     FUNCTION = "generate_text"
-    CATEGORY = "sampling"
+    CATEGORY = "N-Suite/Sampling"
 
     def generate_text(self,prompt, max_tokens, temperature, top_p, logprobs, echo, stop_token, frequency_penalty, presence_penalty, repeat_penalty, top_k, tfs_z, model,model_path,print_output,cached,prefix,suffix):
         

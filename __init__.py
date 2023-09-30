@@ -10,16 +10,18 @@ import requests
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-def install_and_import(package):
+def install_and_import(package,packegename=""):
+    if packegename == "":
+        packegename = package
     import importlib
     try:
         print("Detected: ", package)
-        importlib.import_module(package)
+        importlib.import_module(packegename)
     except ImportError:
         import pip
         pip.main(['install', package])
     finally:
-        globals()[package] = importlib.import_module(package)
+        globals()[package] = importlib.import_module(packegename)
 
 def check_module(package):
     import importlib
@@ -65,7 +67,8 @@ if init():
     install_and_import('cv2')
     install_and_import('git')
     install_and_import('zipfile')
-
+    install_and_import('scikit-build', "skbuild")
+    
     #git clone https://github.com/hzwer/Practical-RIFE.git
     from git import Repo
     if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle")):

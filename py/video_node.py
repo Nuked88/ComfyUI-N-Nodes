@@ -16,6 +16,7 @@ import json
 from comfy.cli_args import args
 import time
 import concurrent.futures
+import skbuild
 
 # Brutally copied from comfy_extras/nodes_rebatch.py and modified
 class LatentRebatch:
@@ -169,6 +170,7 @@ def resize_image(input_path, new_width, new_height):
 
     if height != new_height or width != new_width:
         resized_image = cv2.resize(image, (new_width, new_height))
+        print(f"Resized image from {width}x{height} to {new_width}x{new_height}")
     else:
         resized_image = image
  
@@ -301,7 +303,7 @@ def create_gif_from_frames(frame_folder, output_gif):
 temp_dir= folder_paths.temp_directory
 
 
-class VideoLoader:
+class LoadVideo:
     def __init__(self):
         pass
     
@@ -322,7 +324,7 @@ class VideoLoader:
     RETURN_TYPES = ("IMAGE","LATENT","STRING","INT","INT",)
     OUTPUT_IS_LIST = (True, True, False, False,False, )   
     RETURN_NAMES = ("IMAGES","EMPTY LATENTS","METADATA","WIDTH","HEIGHT")
-    CATEGORY = "video"
+    CATEGORY = "N-Suite/Video"
     FUNCTION = "encode"
 
 
@@ -408,6 +410,7 @@ class VideoLoader:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             width, height = calc_resize_image(FRAMES[0], size, resize_by)
+            print(f"Image new size: {width}x{height}")
 
 
             for batch_start in range(0, len(FRAMES), pool_size):
@@ -466,7 +469,7 @@ class VideoLoader:
         return ( [i_tensor],[latent],metadata, width, height,) 
     
     
-class VideoSaver:
+class SaveVideo:
     def __init__(self):
         
         self.type = "output"
@@ -487,7 +490,7 @@ class VideoSaver:
         return {"required": 
                     {"images": ("IMAGE", ),
                      "METADATA": ("STRING",  {"default": "", "forceInput": True}  ),  
-                      "SaveVideo": (_choice,{"default": "No"} ),
+                      "SaveVideo": ("BOOLEAN",{"default": False} ),
                      },
                 "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
                 }
@@ -498,7 +501,7 @@ class VideoSaver:
 
     OUTPUT_NODE = True
 
-    CATEGORY = "video"
+    CATEGORY = "N-Suite/Video"
 
     def save_video(self, images,METADATA,SaveVideo, prompt=None, extra_pnginfo=None):
  
@@ -519,7 +522,7 @@ class VideoSaver:
            
 
             #file = f"frame_{counter:05}_.png"
-            img.save(full_output_folder, pnginfo=metadata, compress_level=4)
+            img.save(full_output_folder, pnginfo=metadata, compress_level=0)
             results.append({
                 "filename": file,
                 "subfolder": "frames",
@@ -540,7 +543,7 @@ class VideoSaver:
                 video_clip = video_clip.set_audio(audio_clip)
             except:
                 pass
-            if SaveVideo == "Yes":
+            if SaveVideo == True:
                 video_clip.write_videofile(self.video_file_path)
                 file_name = self.video_filename
             else:
@@ -576,7 +579,7 @@ class LoadFramesFromFolder:
     RETURN_NAMES = ("IMAGES","METADATA")
     FUNCTION = "load_images"
     OUTPUT_IS_LIST = (True,False,)
-    CATEGORY = "video"
+    CATEGORY = "N-Suite/Video"
 
     def load_images(self, folder,fps):
         image_list = []
@@ -597,14 +600,14 @@ class LoadFramesFromFolder:
 # A dictionary that contains all nodes you want to export with their names
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "VideoLoader": VideoLoader,
-    "VideoSaver":VideoSaver,
+    "LoadVideo": LoadVideo,
+    "SaveVideo":SaveVideo,
     "LoadFramesFromFolder": LoadFramesFromFolder
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Video": "VideoLoader",
-    "Video": "VideoSaver",
+    "Video": "LoadVideo",
+    "Video": "SaveVideo",
     "Video": "LoadFramesFromFolder"
 }

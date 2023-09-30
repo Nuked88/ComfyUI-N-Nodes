@@ -62,7 +62,7 @@ app.registerExtension({
 	
 			
 		const onAdded = nodeType.prototype.onAdded;
-		if (nodeData.name === "VideoSaver") {
+		if (nodeData.name === "SaveVideo") {
 		nodeType.prototype.onAdded = function () {
 
 			ExtendedComfyWidgets["VIDEO"](this, "videoOutWidget", ["STRING"], "", app,"output");

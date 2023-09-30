@@ -133,7 +133,7 @@ def image_preprocessing(i):
 
 _choice = ["YES", "NO"]
 _range = ["Fixed", "Random"]
-class InterpolationNode:
+class FrameInterpolation:
     def __init__(self):
         
         self.type = "output"
@@ -153,7 +153,7 @@ class InterpolationNode:
         return {"required": 
                     {"images": ("IMAGE", ),
                      "METADATA": ("STRING",  {"default": "", "forceInput": True}  ),
-                     "multi": ("INT", {"default": 2, "min": 0, "step": 1}),
+                     "multi": ("INT", {"default": 2, "min": 1, "step": 1}),
                      
                      },
 
@@ -166,12 +166,12 @@ class InterpolationNode:
 
     OUTPUT_NODE = True
 
-    CATEGORY = "video"
+    CATEGORY = "N-Suite/Video"
 
     RETURN_TYPES = ("IMAGE","STRING",)
     OUTPUT_IS_LIST = (True, False, )   
     RETURN_NAMES = ("IMAGES","METADATA",)
-    CATEGORY = "video"
+   
     FUNCTION = "interpolate"
 
 
@@ -192,7 +192,7 @@ class InterpolationNode:
            
 
             #file = f"frame_{counter:05}_.png"
-            img.save(full_input_temp_frame_folder, pnginfo=metadata, compress_level=4)
+            img.save(full_input_temp_frame_folder, pnginfo=metadata, compress_level=0)
 
 
         try:
@@ -310,13 +310,13 @@ class InterpolationNode:
 
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "InterpolationNode": InterpolationNode,
+    "FrameInterpolation": FrameInterpolation,
 
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Video": "InterpolationNode"
+    "Video": "FrameInterpolation"
 }
 
 

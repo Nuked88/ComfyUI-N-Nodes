@@ -23,7 +23,7 @@ class DynamicPrompt:
                 }
     RETURN_TYPES = ("STRING",)
     FUNCTION = "prompt_generator"
-    CATEGORY = "conditioning"
+    CATEGORY = "N-Suite/Conditioning"
     OUTPUT_NODE = True
 
     """

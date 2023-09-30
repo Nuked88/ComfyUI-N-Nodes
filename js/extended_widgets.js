@@ -291,7 +291,7 @@ export const ExtendedComfyWidgets = {
 			};
 		}
 
-		if (node.type =="VideoLoader"){
+		if (node.type =="LoadVideo"){
 			// do this only on VideoLoad node!
 			let uploadWidget;
 			const fileInput = document.createElement("input");

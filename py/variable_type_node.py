@@ -19,7 +19,7 @@ class IntVariable:
 
     RETURN_TYPES = ("INT",)
     FUNCTION = "check_int"
-    CATEGORY = "Variables"
+    CATEGORY = "N-Suite/Variables"
 
     def check_int(self, value):
         if value == "":
@@ -53,7 +53,7 @@ class FloatVariable:
 
     RETURN_TYPES = ("FLOAT",)
     FUNCTION = "check"
-    CATEGORY = "Variables"
+    CATEGORY = "N-Suite/Variables"
 
     def check(self, value):
         if value == "":
@@ -78,7 +78,7 @@ class StringVariable:
 
     RETURN_TYPES = ("STRING",)
     FUNCTION = "check"
-    CATEGORY = "Variables"
+    CATEGORY = "N-Suite/Variables"
 
     def check(self, value):
         if value == "undefined":

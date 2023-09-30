@@ -107,32 +107,35 @@ class LatentRebatch:
 
 
 input_dir = os.path.join(folder_paths.get_input_directory(),"n-suite")
-output_dir = os.path.join(folder_paths.get_output_directory(),"n-suite")
-frames_output_dir = os.path.join(folder_paths.get_output_directory(),"frames")
-videos_output_dir = os.path.join(folder_paths.get_output_directory(),"videos")
+output_dir = os.path.join(folder_paths.get_output_directory(),"n-suite","frames_out")
+frames_output_dir = os.path.join(folder_paths.get_temp_directory(),"n-suite","frames")
+videos_output_dir = os.path.join(folder_paths.get_output_directory(),"n-suite","videos")
 audios_output_temp_dir = os.path.join(folder_paths.get_temp_directory(),"audio.mp3")
 videos_output_temp_dir = os.path.join(folder_paths.get_temp_directory(),"video.mp4")
-video_preview_output_temp_dir = os.path.join(folder_paths.get_output_directory(),"videos")
+video_preview_output_temp_dir = os.path.join(folder_paths.get_output_directory(),"n-suite","videos")
 _resize_type = ["none","width", "height"]
 _framerate = ["original","half", "quarter"]
 _choice = ["Yes", "No"]
 try:
-    os.mkdir(input_dir)
+    os.makedirs(input_dir)
+except:
+    pass
+try:
+    os.makedirs(output_dir)
+except:
+    pass
+try:
+    os.makedirs(videos_output_dir)
 except:
     pass
 
 try:
-    os.mkdir(videos_output_dir)
+    os.makedirs(frames_output_dir)
 except:
     pass
 
 try:
-    os.mkdir(frames_output_dir)
-except:
-    pass
-
-try:
-    os.mkdir(folder_paths.get_temp_directory())
+    os.makedirs(folder_paths.get_temp_directory())
 except:
     pass
 
@@ -175,26 +178,6 @@ def resize_image(input_path, new_width, new_height):
 
     return pil_image
 
-""" def extract_frames_from_video(video_path, output_folder):
-
-    list_files = []
-    os.makedirs(output_folder, exist_ok=True)
-    cap = cv2.VideoCapture(video_path)
-    frame_count = 0
-
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frame_count += 1
-        frame_filename = os.path.join(output_folder, f"frame_{frame_count:04d}.png")
-        list_files.append(frame_filename)
-        cv2.imwrite(frame_filename, frame)
-
-    cap.release()
-    print(f"{frame_count} frames have been extracted from the video and saved in {output_folder}")
-    return list_files """
 
 
 def extract_frames_from_video(video_path, output_folder, target_fps=30):
@@ -217,7 +200,7 @@ def extract_frames_from_video(video_path, output_folder, target_fps=30):
 
         # Estrai solo ogni "frame_skip_ratio"-esimo fotogramma
         if frame_count % frame_skip_ratio == 0:
-            frame_filename = os.path.join(output_folder, f"frame_{frame_count:04d}.png")
+            frame_filename = os.path.join(output_folder, f"{frame_count:07d}.png")
             list_files.append(frame_filename)
             cv2.imwrite(frame_filename, frame)
             real_frame_count += 1
@@ -235,12 +218,31 @@ def extract_frames_from_gif(gif_path, output_folder):
     frame_count = 0
     for frame in gif_frames:
         frame_count += 1
-        frame_filename = os.path.join(output_folder, f"frame_{frame_count:04d}.png")
+        frame_filename = os.path.join(output_folder, f"{frame_count:07d}.png")
         cv2.imwrite(frame_filename, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
     print(f"{frame_count} frames have been extracted from the GIF and saved in {output_folder}")
 
 def get_output_filename(input_file_path, output_folder, file_extension,suffix="") :
+    existing_files = [f for f in os.listdir(output_folder)]
+    max_progressive = 0
+    for filename in existing_files:
+        parts_ext = filename.split(".")
+        parts = parts_ext[0]
+
+        if len(parts) > 2 and parts.isdigit():
+            progressive = int(parts)
+            max_progressive = max(max_progressive, progressive)
+
+
+    
+    new_progressive = max_progressive + 1
+    new_filename = f"{new_progressive:07d}{suffix}{file_extension}"
+
+    return os.path.join(output_folder, new_filename), new_filename
+
+
+def get_output_filename_video(input_file_path, output_folder, file_extension,suffix="") :
     input_filename = os.path.basename(input_file_path)
     input_filename_without_extension = os.path.splitext(input_filename)[0]
 
@@ -270,7 +272,6 @@ def image_preprocessing(i):
 def create_video_from_frames(frame_folder, output_video, frame_rate = 30.0): 
     frame_filenames = [os.path.join(frame_folder, filename) for filename in os.listdir(frame_folder) if filename.endswith(".png")]
     frame_filenames.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
-
     first_frame = cv2.imread(frame_filenames[0])
     height, width, layers = first_frame.shape
 
@@ -320,7 +321,7 @@ class VideoLoader:
 
     RETURN_TYPES = ("IMAGE","LATENT","STRING","INT","INT",)
     OUTPUT_IS_LIST = (True, True, False, False,False, )   
-    RETURN_NAMES = ("IMAGES","LATENT","METADATA","WIDTH","HEIGHT")
+    RETURN_NAMES = ("IMAGES","EMPTY LATENTS","METADATA","WIDTH","HEIGHT")
     CATEGORY = "video"
     FUNCTION = "encode"
 
@@ -473,7 +474,7 @@ class VideoSaver:
      
     @classmethod
     def INPUT_TYPES(s):
-        s.video_file_path,s.video_filename = get_output_filename("video", videos_output_dir, ".mp4")
+        s.video_file_path,s.video_filename = get_output_filename_video("video", videos_output_dir, ".mp4")
         
         try:
             shutil.rmtree(frames_output_dir)
@@ -500,17 +501,18 @@ class VideoSaver:
     CATEGORY = "video"
 
     def save_video(self, images,METADATA,SaveVideo, prompt=None, extra_pnginfo=None):
-       
+ 
         fps = METADATA[0]
         frame_number = METADATA[1]
-        results = list()
+    
         
         #full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path("", frames_output_dir, images[0].shape[1], images[0].shape[0])
         results = list()
+    
         for image in images:
-
-            full_output_folder,file = get_output_filename("frame", frames_output_dir, ".png") 
-
+            
+            full_output_folder,file = get_output_filename("", frames_output_dir, ".png") 
+            file_name = file
             i = 255. * image.cpu().numpy()
             img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
             metadata = None
@@ -523,8 +525,9 @@ class VideoSaver:
                 "subfolder": "frames",
                 "type": self.type
             })
+            
         try:
-            file_name_number = int(file.split(".")[0].split("_")[1])
+            file_name_number = int(file.split(".")[0])
         except:
             file_name_number = 0
 
@@ -570,6 +573,7 @@ class LoadFramesFromFolder:
     
 
     RETURN_TYPES = ("IMAGE","STRING",)
+    RETURN_NAMES = ("IMAGES","METADATA")
     FUNCTION = "load_images"
     OUTPUT_IS_LIST = (True,False,)
     CATEGORY = "video"
@@ -580,12 +584,12 @@ class LoadFramesFromFolder:
         
         images = [os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(".png")]
         images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
+        
         for image in images:
         
             image_list.append(image_preprocessing(Image.open(image)))
 
         #i_tensor = torch.stack(image_list, dim=0)
-
         return (image_list,METADATA,)
 
 

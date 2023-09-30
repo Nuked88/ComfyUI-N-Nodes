@@ -4,6 +4,50 @@ import { ComfyWidgets } from "/scripts/widgets.js";
 
 const MultilineSymbol = Symbol();
 const MultilineResizeSymbol = Symbol();
+async function uploadFile(file, updateNode, node, pasted = false) {
+	const videoWidget = node.widgets.find((w) => w.name === "video");
+
+
+	try {
+		// Wrap file in formdata so it includes filename
+		const body = new FormData();
+		body.append("image", file);
+		if (pasted) {
+			body.append("subfolder", "pasted");
+		}
+		else {
+			body.append("subfolder", "n-suite");
+		}
+
+		const resp = await api.fetchApi("/upload/image", {
+			method: "POST",
+			body,
+		});
+
+		if (resp.status === 200) {
+			const data = await resp.json();
+			// Add the file to the dropdown list and update the widget value
+			let path = data.name;
+
+
+			if (!videoWidget.options.values.includes(path)) {
+				videoWidget.options.values.push(path);
+			}
+
+			if (updateNode) {
+
+				videoWidget.value = path;
+				if (data.subfolder) path = data.subfolder + "/" + path;
+				showVideoInput(path,node);
+
+			}
+		} else {
+			alert(resp.status + " - " + resp.statusText);
+		}
+	} catch (error) {
+		alert(error);
+	}
+}
 
 function addVideo(node, name,src, app) {
 	const MIN_SIZE = 50;
@@ -211,7 +255,7 @@ export function showVideoOutput(name,node) {
 	
 	
 	let folder_separator = name.lastIndexOf("/");
-	let subfolder = "videos";
+	let subfolder = "n-suite/videos";
 	if (folder_separator > -1) {
 		subfolder = name.substring(0, folder_separator);
 		name = name.substring(folder_separator + 1);
@@ -246,7 +290,29 @@ export const ExtendedComfyWidgets = {
 				}
 			};
 		}
-	
+
+		if (node.type =="VideoLoader"){
+			// do this only on VideoLoad node!
+			let uploadWidget;
+			const fileInput = document.createElement("input");
+			Object.assign(fileInput, {
+				type: "file",
+				accept: "video/mp4,image/gif",
+				style: "display: none",
+				onchange: async () => {
+					if (fileInput.files.length) {
+						await uploadFile(fileInput.files[0], true,node);
+					}
+				},
+			});
+			document.body.append(fileInput);
+			// Create the button widget for selecting the files
+			uploadWidget = node.addWidget("button", "choose file to upload", "image", () => {
+				fileInput.click();
+			});
+			uploadWidget.serialize = false;
+
+	}
 
 		return res;	
 	}

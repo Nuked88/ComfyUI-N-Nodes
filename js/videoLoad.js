@@ -87,7 +87,7 @@ app.registerExtension({
 				console.log("onDragDrop called");
 				let handled = false;
 				for (const file of e.dataTransfer.files) {
-					if (file.type.startsWith("video/mp4") || file.type.startsWith("image/gif")) {
+					if (file.type.startsWith("video/mp4")) {
 						
 						const filePath = file.path || (file.webkitRelativePath || '').split('/').slice(1).join('/'); 
 

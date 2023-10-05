@@ -7,7 +7,7 @@ A suite of custom nodes for ComfyUI, for now i just put Integer, string and floa
 `git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
 to your ComfyUI `custom_nodes` directory
 
-2. **IMPORTANT**: For the GPT node you need to run **install_dependency bat file**. 
+2. **IMPORTANT**: If you want the GPT node you need to run **install_dependency bat file**. 
 There are 2 versions: ***install_dependency_ggml_models.bat*** for the old ggmlv3 models and ***install_dependency_new_models.bat*** for all the new models (GGUF).
 YOU CAN ONLY USE ONE OF THEM AT A TIME!
 Since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python) . This bats are made for the official portable windows version of ComfyUI
@@ -25,6 +25,85 @@ Since _llama-cpp-python_ needs to be compiled from source code to enable it to u
 
 # Features
 
+## 📽️ Video Nodes 📽️
+
+### LoadVideo
+The LoadVideo node allows loading a video file and extracting frames from it.
+
+#### Input Fields
+- `video`: Select the video file to load.
+- `framerate`: Choose whether to keep the original framerate or reduce to half or quarter speed.
+- `resize_by`: Select how to resize frames - 'none', 'height', or 'width'.
+- `size`: Target size if resizing by height or width.
+- `images_limit`: Limit number of frames to extract.
+- `batch_size`: Batch size for encoding frames.
+
+#### Output
+
+- `IMAGES`: Extracted frame images as PyTorch tensors.
+- `LATENT`: Empty latent vectors.
+- `METADATA`: Video metadata - FPS and number of frames.
+- `WIDTH:` Frame width.
+- `HEIGHT`: Frame height.
+
+The node extracts frames from the input video at the specified framerate. It resizes frames if chosen and returns them as batches of PyTorch image tensors along with latent vectors, metadata, and frame dimensions.
+
+### SaveVideo
+The SaveVideo node takes in extracted frames and saves them back as a video file.
+
+#### Input Fields
+- `images`: Frame images as tensors.
+- `METADATA`: Metadata from LoadVideo node.
+- `SaveVideo`: Toggle saving output video file.
+- `SaveFrames`: Toggle saving frames to a folder.
+- `CompressionLevel`: PNG compression level for saving frames.
+#### Output
+Saves output video file and/or extracted frames.
+
+The node takes extracted frames and metadata and can save them as a new video file and/or individual frame images. Video compression and frame PNG compression can be configured.
+
+### LoadFramesFromFolder
+The LoadFramesFromFolder node allows loading image frames from a folder and returning them as a batch.
+
+#### Input Fields
+- `folder`: Path to the folder containing the frame images.
+- `fps`: Frames per second to assign to the loaded frames.
+
+#### Output
+- `IMAGES`: Batch of loaded frame images as PyTorch tensors.
+- `METADATA`: Metadata containing the set FPS value.
+
+The node loads all image files from the specified folder, converts them to PyTorch tensors, and returns them as a batched tensor along with simple metadata containing the set FPS value.
+
+This allows easily loading a set of frames that were extracted and saved previously, for example, to reload and process them again. By setting the FPS value, the frames can be properly interpreted as a video sequence.
+
+Here is an explanation of the FrameInterpolator node:
+
+### FrameInterpolator
+
+The FrameInterpolator node allows interpolating between extracted video frames to increase the frame rate and smooth motion.
+
+#### Input Fields
+
+- `images`: Extracted frame images as tensors.
+- `METADATA`: Metadata from video - FPS and number of frames.
+- `multiplier`: Factor by which to increase frame rate. 
+
+#### Output  
+
+- `IMAGES`: Interpolated frames as image tensors.
+- `METADATA`: Updated metadata with new frame rate.
+
+The node takes extracted frames and metadata as input. It uses an interpolation model (RIFE) to generate additional in-between frames at a higher frame rate. 
+
+The original frame rate in the metadata is multiplied by the `multiplier` value to get the new interpolated frame rate.
+
+The interpolated frames are returned as a batch of image tensors, along with updated metadata containing the new frame rate.
+
+This allows increasing the frame rate of an existing video to achieve smoother motion and slower playback. The interpolation model creates new realistic frames to fill in the gaps rather than just duplicating existing frames.
+
+The original code has been taken from [HERE](https://github.com/hzwer/Practical-RIFE/tree/main)
+
 ## Variables
 Since the primitive node has limitations in links (for example at the time i'm writing you cannot link "start_at_step" and "steps" of another ksampler toghether), I decided to create these simple node-variables to bypass this limitation
 The node-variables are:
@@ -33,7 +112,7 @@ The node-variables are:
 - String
 
 
-## GPTLoaderSimple and GPTSampler
+## 🤖 GPTLoaderSimple and GPTSampler 🤖
 
 These custom nodes are designed to enhance the capabilities of the ConfyUI framework by enabling text generation using GPTQ GPT models. This README provides an overview of the two custom nodes and their usage within ConfyUI.
 

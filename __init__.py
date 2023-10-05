@@ -6,22 +6,27 @@ import sys
 from .nnodes import init, get_ext_dir
 import folder_paths
 import requests
+import subprocess
+
+
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-def install_and_import(package,packegename=""):
-    if packegename == "":
-        packegename = package
-    import importlib
+def check_and_install(package, import_name=""):
+    if import_name == "":
+        import_name = package
     try:
-        print("Detected: ", package)
-        importlib.import_module(packegename)
+        importlib.import_module(import_name)
+        print(f"{import_name} is already installed.")
     except ImportError:
-        import pip
-        pip.main(['install', package])
-    finally:
-        globals()[package] = importlib.import_module(packegename)
+        print(f"{import_name} is not installed. Installing...")
+        install_package(package)
+
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", package])
+
+
 
 def check_module(package):
     import importlib
@@ -32,6 +37,8 @@ def check_module(package):
     except ImportError:
         return False
 import zipfile
+
+
 def downloader(link):
     print("Downloading dependencies...")
     response = requests.get(link, stream=True)
@@ -42,17 +49,13 @@ def downloader(link):
     temp_file = os.path.join(folder_paths.get_temp_directory(), "file.zip")
     with open(temp_file, "wb") as f:
         for chunk in response.iter_content(chunk_size=1024):
-            if chunk: # Filtra i chunk vuoti
-                f.write(chunk) # Scrivi il chunk nel file
+            if chunk: 
+                f.write(chunk) 
 
-
-
-
-    # Estrai lo zip nella cartella desiderata
-    zip_file = zipfile.ZipFile(temp_file) # Apri il file zip
+    zip_file = zipfile.ZipFile(temp_file) 
     target_dir = os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle") # Cartella dove estrarre lo zip
 
-    zip_file.extractall(target_dir) # Estrai tutti i file dello zip nella cartella
+    zip_file.extractall(target_dir) 
 
 
 
@@ -63,11 +66,11 @@ def downloader(link):
 if init():
     py = get_ext_dir("py")
     files = glob.glob("*.py", root_dir=py, recursive=False)
-    install_and_import('moviepy')
-    install_and_import('cv2')
-    install_and_import('git')
-    install_and_import('zipfile')
-    install_and_import('scikit-build', "skbuild")
+    check_and_install('moviepy')
+    check_and_install("opencv-python","cv2")
+    check_and_install('git')
+    check_and_install('zipfile')
+    check_and_install('scikit-build',"skbuild")
     
     #git clone https://github.com/hzwer/Practical-RIFE.git
     from git import Repo

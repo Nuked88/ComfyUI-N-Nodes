@@ -31,7 +31,7 @@ except:
     pass
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-multi = 2
+
 scale=1
 torch.set_grad_enabled(False)
 if torch.cuda.is_available():
@@ -133,7 +133,7 @@ def image_preprocessing(i):
 
 _choice = ["YES", "NO"]
 _range = ["Fixed", "Random"]
-class FrameInterpolation:
+class FrameInterpolator:
     def __init__(self):
         
         self.type = "output"
@@ -153,7 +153,7 @@ class FrameInterpolation:
         return {"required": 
                     {"images": ("IMAGE", ),
                      "METADATA": ("STRING",  {"default": "", "forceInput": True}  ),
-                     "multi": ("INT", {"default": 2, "min": 1, "step": 1}),
+                     "multiplier": ("INT", {"default": 2, "min": 1, "step": 1}),
                      
                      },
 
@@ -176,8 +176,8 @@ class FrameInterpolation:
 
 
 
-    def interpolate(self,images,multi,METADATA):
-        fps = METADATA[0]*multi
+    def interpolate(self,images,multiplier,METADATA):
+        fps = METADATA[0]*multiplier
         frame_number = METADATA[1]
  
 
@@ -264,11 +264,11 @@ class FrameInterpolation:
                     
                 if ssim < 0.2:
                     output = []
-                    for i in range(multi - 1):
+                    for i in range(multiplier - 1):
                         output.append(I0)
 
                 else:
-                    output = make_inference(I0, I1, multi-1)
+                    output = make_inference(I0, I1, multiplier-1)
 
 
                 write_buffer.put(lastframe)
@@ -310,13 +310,13 @@ class FrameInterpolation:
 
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "FrameInterpolation": FrameInterpolation,
+    "FrameInterpolator": FrameInterpolator,
 
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Video": "FrameInterpolation"
+    "Video": "FrameInterpolator"
 }
 
 

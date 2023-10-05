@@ -170,7 +170,6 @@ def resize_image(input_path, new_width, new_height):
 
     if height != new_height or width != new_width:
         resized_image = cv2.resize(image, (new_width, new_height))
-        print(f"Resized image from {width}x{height} to {new_width}x{new_height}")
     else:
         resized_image = image
  
@@ -410,7 +409,6 @@ class LoadVideo:
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
             width, height = calc_resize_image(FRAMES[0], size, resize_by)
-            print(f"Image new size: {width}x{height}")
 
 
             for batch_start in range(0, len(FRAMES), pool_size):
@@ -491,6 +489,8 @@ class SaveVideo:
                     {"images": ("IMAGE", ),
                      "METADATA": ("STRING",  {"default": "", "forceInput": True}  ),  
                       "SaveVideo": ("BOOLEAN",{"default": False} ),
+                      "SaveFrames": ("BOOLEAN",{"default": False} ),
+                      "CompressionLevel":  ("INT", {"default": 2, "min": 0, "max":9, "step": 1}),
                      },
                 "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
                 }
@@ -503,7 +503,7 @@ class SaveVideo:
 
     CATEGORY = "N-Suite/Video"
 
-    def save_video(self, images,METADATA,SaveVideo, prompt=None, extra_pnginfo=None):
+    def save_video(self, images,METADATA,SaveVideo,SaveFrames, CompressionLevel, prompt=None, extra_pnginfo=None):
  
         fps = METADATA[0]
         frame_number = METADATA[1]
@@ -522,7 +522,7 @@ class SaveVideo:
            
 
             #file = f"frame_{counter:05}_.png"
-            img.save(full_output_folder, pnginfo=metadata, compress_level=0)
+            img.save(full_output_folder, pnginfo=metadata, compress_level=CompressionLevel)
             results.append({
                 "filename": file,
                 "subfolder": "frames",
@@ -543,6 +543,13 @@ class SaveVideo:
                 video_clip = video_clip.set_audio(audio_clip)
             except:
                 pass
+            
+            if SaveFrames == True:
+                #copy frames_output_dir to self.video_file_path/self.video_filename
+                frame_folder=os.path.join(videos_output_dir,self.video_filename.split(".")[0])
+                
+                shutil.copytree(frames_output_dir, frame_folder)
+
             if SaveVideo == True:
                 video_clip.write_videofile(self.video_file_path)
                 file_name = self.video_filename

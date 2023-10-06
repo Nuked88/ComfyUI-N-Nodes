@@ -66,7 +66,7 @@ The node takes extracted frames and metadata and can save them as a new video fi
 The LoadFramesFromFolder node allows loading image frames from a folder and returning them as a batch.
 
 #### Input Fields
-- `folder`: Path to the folder containing the frame images.
+- `folder`: Path to the folder containing the frame images.Must be png format, named with a number (eg. 1.png or even 0001.png).The images will be loaded sequentially.
 - `fps`: Frames per second to assign to the loaded frames.
 
 #### Output
@@ -77,7 +77,6 @@ The node loads all image files from the specified folder, converts them to PyTor
 
 This allows easily loading a set of frames that were extracted and saved previously, for example, to reload and process them again. By setting the FPS value, the frames can be properly interpreted as a video sequence.
 
-Here is an explanation of the FrameInterpolator node:
 
 ### FrameInterpolator
 

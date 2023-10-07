@@ -602,6 +602,32 @@ class LoadFramesFromFolder:
         #i_tensor = torch.stack(image_list, dim=0)
         return (image_list,METADATA,)
 
+    
+class SetMetadata:
+    def __init__(self):
+        pass
+
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": { "number_of_frames":("INT",  {"default": 1, "min": 1, "step": 1}),
+                             "fps":("INT", {"default": 30, "min": 1, "step": 1})
+                             
+                             
+                             }}
+    
+
+    RETURN_TYPES = ("STRING",)
+    RETURN_NAMES = ("METADATA",)
+    FUNCTION = "set_metadata"
+    OUTPUT_IS_LIST = (False,)
+    CATEGORY = "N-Suite/Video"
+
+    def set_metadata(self, number_of_frames,fps):
+     
+        METADATA = [fps, number_of_frames]
+        return (METADATA,)
+
+
 
 
 # A dictionary that contains all nodes you want to export with their names
@@ -609,12 +635,14 @@ class LoadFramesFromFolder:
 NODE_CLASS_MAPPINGS = {
     "LoadVideo": LoadVideo,
     "SaveVideo":SaveVideo,
-    "LoadFramesFromFolder": LoadFramesFromFolder
+    "LoadFramesFromFolder": LoadFramesFromFolder,
+    "SetMetadataForSaveVideo": SetMetadata
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
     "Video": "LoadVideo",
     "Video": "SaveVideo",
-    "Video": "LoadFramesFromFolder"
+    "Video": "LoadFramesFromFolder",
+    "Video": "SetMetadataForSaveVideo"
 }

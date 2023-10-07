@@ -7,7 +7,7 @@ from .nnodes import init, get_ext_dir
 import folder_paths
 import requests
 import subprocess
-
+import traceback
 
 
 NODE_CLASS_MAPPINGS = {}
@@ -93,6 +93,7 @@ if init():
                 if hasattr(module, "NODE_DISPLAY_NAME_MAPPINGS") and getattr(module, "NODE_DISPLAY_NAME_MAPPINGS") is not None:
                     NODE_DISPLAY_NAME_MAPPINGS.update(module.NODE_DISPLAY_NAME_MAPPINGS)
         except Exception as e:
-            print(e)
+            traceback.print_exc()
+
 
 __all__ = ["NODE_CLASS_MAPPINGS", "NODE_DISPLAY_NAME_MAPPINGS"]

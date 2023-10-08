@@ -1,0 +1,8 @@
+make
+moviepy
+opencv-python
+git
+zipfile
+scikit-build
+llama-cpp-python
+

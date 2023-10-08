@@ -71,7 +71,7 @@ if init():
     check_and_install('git')
     check_and_install('zipfile')
     check_and_install('scikit-build',"skbuild")
-    
+
     #git clone https://github.com/hzwer/Practical-RIFE.git
     from git import Repo
     if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle")):

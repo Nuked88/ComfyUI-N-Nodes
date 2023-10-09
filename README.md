@@ -18,6 +18,11 @@ Since _llama-cpp-python_ needs to be compiled from source code to enable it to u
 - For uninstallation:
   - Delete the `ComfyUI-N-Nodes` folder in `custom_nodes`
 
+# Important
+These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
+**Any other environment has not been tested.**
+
+
 
 # Update
 1. Navigate to the cloned repo e.g. `custom_nodes/ComfyUI-N-Nodes`

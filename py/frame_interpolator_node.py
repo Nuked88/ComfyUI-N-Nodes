@@ -179,6 +179,7 @@ class FrameInterpolator:
     def interpolate(self,images,multiplier,METADATA):
         fps = METADATA[0]*multiplier
         frame_number = METADATA[1]
+        video_name = METADATA[2]
  
 
 
@@ -292,7 +293,7 @@ class FrameInterpolator:
 
 
             
-            METADATA = [fps, len(os.listdir(interpolation_temp_output_folder))]
+            METADATA = [fps, len(os.listdir(interpolation_temp_output_folder)),video_name]
             
             images = [os.path.join(interpolation_temp_output_folder, filename) for filename in os.listdir(interpolation_temp_output_folder) if filename.endswith(".png")]
             images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))

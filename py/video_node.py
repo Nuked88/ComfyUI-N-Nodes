@@ -18,6 +18,12 @@ import time
 import concurrent.futures
 import skbuild
 
+
+
+
+YELLOW = '\33[33m'
+END = '\33[0m'
+
 # Brutally copied from comfy_extras/nodes_rebatch.py and modified
 class LatentRebatch:
 
@@ -109,6 +115,7 @@ class LatentRebatch:
 
 input_dir = os.path.join(folder_paths.get_input_directory(),"n-suite")
 output_dir = os.path.join(folder_paths.get_output_directory(),"n-suite","frames_out")
+temp_output_dir = os.path.join(folder_paths.get_temp_directory(),"n-suite","frames_out")
 frames_output_dir = os.path.join(folder_paths.get_temp_directory(),"n-suite","frames")
 videos_output_dir = os.path.join(folder_paths.get_output_directory(),"n-suite","videos")
 audios_output_temp_dir = os.path.join(folder_paths.get_temp_directory(),"audio.mp3")
@@ -125,6 +132,12 @@ try:
     os.makedirs(output_dir)
 except:
     pass
+ 
+try:
+    os.makedirs(temp_output_dir)
+except:
+    pass
+
 try:
     os.makedirs(videos_output_dir)
 except:
@@ -349,9 +362,13 @@ class LoadVideo:
             fps = int(cap.get(cv2.CAP_PROP_FPS))
             print(f"The video has {fps} frames per second.")
 
-        shutil.rmtree(output_dir)
-        print(f"Temporary folder {output_dir} has been emptied.")
-        
+        try:
+            shutil.rmtree(os.path.join(temp_output_dir,video.split(".")[0]))
+        except:
+            print("Video Path already deleted")
+        #print(f"Temporary folder {output_dir} has been emptied.")
+
+        full_temp_output_dir = os.path.join(temp_output_dir,video.split(".")[0])
         #set new framerate
         
         if "half" in framerate:
@@ -366,13 +383,14 @@ class LoadVideo:
         file_extension = os.path.splitext(file_path)[1].lower()
 
         if file_extension == ".mp4":
-            list_files = extract_frames_from_video(file_path, output_dir, target_fps=fps)
+            list_files = extract_frames_from_video(file_path, full_temp_output_dir, target_fps=fps)
 
             audio_clip = VideoFileClip(file_path).audio
             try:
                 #save audio
-                audio_clip.write_audiofile(audios_output_temp_dir)
+                audio_clip.write_audiofile(os.path.join(temp_output_dir,video.split(".")[0],"audio.mp3"))
             except:
+                print("Could not save audio")
                 pass
 
             """        
@@ -400,6 +418,24 @@ class LoadVideo:
     def encode(self,video,framerate, local_url, resize_by, size, images_limit,batch_size):
         metadata = []
         FRAMES,fps = self.load_video(video,framerate, local_url)
+        
+        #if images_limit > fps
+        if images_limit > fps:
+            print(f"{YELLOW}WARNING: The number of images to extract is greater than the number of frames in the video. Images_limit has been reduced to the number of frames. {END}")
+            images_limit = fps
+
+        #if batch_size > fps
+        if batch_size > fps:
+            print(f"{YELLOW}WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced. {END}")
+            batch_size = fps
+
+       #if batch_size > images_limit
+        if images_limit!=0 and batch_size > images_limit:
+            print(f"{YELLOW}WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced to the number of images_limit. {END}")
+            batch_size = images_limit
+
+
+
         pool_size=5
         t_list = []
         i_list = [] 
@@ -416,7 +452,7 @@ class LoadVideo:
                 #remove audio if image_limit > 0
                 if images_limit != 0:
                     try:
-                        os.remove(audios_output_temp_dir)
+                        os.remove(os.path.join(temp_output_dir,video.split(".")[0],"audio.mp3"))
                     except:
                         pass
       
@@ -455,6 +491,10 @@ class LoadVideo:
         
         metadata.append(fps)
         metadata.append(b_size)
+        try:
+            metadata.append(video.split(".")[0])
+        except:
+            print("No video name")
 
         if batch_size != 0:
             rebatcher = LatentRebatch()
@@ -507,6 +547,7 @@ class SaveVideo:
  
         fps = METADATA[0]
         frame_number = METADATA[1]
+        video_filename_original = METADATA[2]
     
         
         #full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path("", frames_output_dir, images[0].shape[1], images[0].shape[0])
@@ -539,9 +580,10 @@ class SaveVideo:
         
             video_clip = VideoFileClip(videos_output_temp_dir)
             try:
-                audio_clip =  AudioFileClip(audios_output_temp_dir)
+                audio_clip =  AudioFileClip(os.path.join(temp_output_dir,video_filename_original,"audio.mp3"))
                 video_clip = video_clip.set_audio(audio_clip)
             except:
+                print("No audio found")
                 pass
             
             if SaveFrames == True:
@@ -577,6 +619,7 @@ class LoadFramesFromFolder:
     def INPUT_TYPES(s):
         return {"required": { "folder":("STRING",  {"default": ""} ),
                              "fps":("INT", {"default": 30})
+                            
                              
                              
                              }}
@@ -590,7 +633,7 @@ class LoadFramesFromFolder:
 
     def load_images(self, folder,fps):
         image_list = []
-        METADATA = [fps, len(os.listdir(folder))]
+        METADATA = [fps, len(os.listdir(folder)),"load"]
         
         images = [os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(".png")]
         images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
@@ -610,7 +653,8 @@ class SetMetadata:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "number_of_frames":("INT",  {"default": 1, "min": 1, "step": 1}),
-                             "fps":("INT", {"default": 30, "min": 1, "step": 1})
+                             "fps":("INT", {"default": 30, "min": 1, "step": 1}),
+                               "VideoName": ("STRING",  {"default": "manual"}  )
                              
                              
                              }}
@@ -622,9 +666,9 @@ class SetMetadata:
     OUTPUT_IS_LIST = (False,)
     CATEGORY = "N-Suite/Video"
 
-    def set_metadata(self, number_of_frames,fps):
+    def set_metadata(self, number_of_frames,fps,VideoName):
      
-        METADATA = [fps, number_of_frames]
+        METADATA = [fps, number_of_frames,VideoName]
         return (METADATA,)
 
 

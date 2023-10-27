@@ -36,7 +36,6 @@ scale=1
 torch.set_grad_enabled(False)
 if torch.cuda.is_available():
     torch.backends.cudnn.enabled = True
-    torch.backends.cudnn.benchmark = True
 
 
 try:
@@ -50,10 +49,7 @@ if not hasattr(model, 'version'):
     model.version = 0
 
 model_folder= os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],'ComfyUI-N-Nodes','libs','rifle','train_log')
-model.load_model(model_folder, -1)
-print("Loaded 3.x/4.x HD model.")
-model.eval()
-model.device()
+
 
 
 
@@ -135,7 +131,10 @@ _choice = ["YES", "NO"]
 _range = ["Fixed", "Random"]
 class FrameInterpolator:
     def __init__(self):
-        
+        model.load_model(model_folder, -1)
+        print("Loaded 3.x/4.x HD model.")
+        model.eval()
+        model.device()
         self.type = "output"
 
      

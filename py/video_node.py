@@ -366,7 +366,7 @@ class LoadVideo:
             shutil.rmtree(os.path.join(temp_output_dir,video.split(".")[0]))
         except:
             print("Video Path already deleted")
-        #print(f"Temporary folder {output_dir} has been emptied.")
+    
 
         full_temp_output_dir = os.path.join(temp_output_dir,video.split(".")[0])
         #set new framerate
@@ -524,7 +524,7 @@ class SaveVideo:
             pass
         
 
-        print(f"Temporary folder {frames_output_dir} has been emptied.")
+        #print(f"Temporary folder {frames_output_dir} has been emptied.")
         return {"required": 
                     {"images": ("IMAGE", ),
                      "METADATA": ("STRING",  {"default": "", "forceInput": True}  ),  

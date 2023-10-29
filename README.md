@@ -46,6 +46,8 @@ The LoadVideo node allows loading a video file and extracting frames from it.
 - `size`: Target size if resizing by height or width.
 - `images_limit`: Limit number of frames to extract.
 - `batch_size`: Batch size for encoding frames.
+- `starting_frame`: Select which frame to start from.
+- `autoplay`: Select whether to autoplay the video.
 
 #### Output
 

@@ -8,7 +8,7 @@ const MultilineResizeSymbol = Symbol();
 async function uploadFile(file, updateNode, node, pasted = false) {
 	const videoWidget = node.widgets.find((w) => w.name === "video");
 	
-
+	
 	try {
 		// Wrap file in formdata so it includes filename
 		const body = new FormData();
@@ -63,10 +63,34 @@ app.registerExtension({
 		nodeType.prototype.onAdded = function () {
 			onAdded?.apply(this, arguments);
 			const temp_web_url = this.widgets.find((w) => w.name === "local_url");
+			const autoplay_value = this.widgets.find((w) => w.name === "autoplay");
 		
-		
+			
+			let uploadWidget;
+			const fileInput = document.createElement("input");
+			Object.assign(fileInput, {
+				type: "file",
+				accept: "video/mp4,image/gif",
+				style: "display: none",
+				onchange: async () => {
+					if (fileInput.files.length) {
+						await uploadFile(fileInput.files[0], true,this);
+					}
+				},
+			});
+			document.body.append(fileInput);
+			// Create the button widget for selecting the files
+			uploadWidget = this.addWidget("button", "choose file to upload", "image", () => {
+				fileInput.click();
+			},{
+				cursor: "grab",
+			},);
+			uploadWidget.serialize = false;
+
+
 		setTimeout(() => {
-			ExtendedComfyWidgets["VIDEO"](this, "videoWidget", ["STRING"], temp_web_url.value, app);
+			ExtendedComfyWidgets["VIDEO"](this, "videoWidget", ["STRING"], temp_web_url.value, app,"input", autoplay_value.value);
+		
 		}, 100); 
 		
 		
@@ -102,9 +126,8 @@ app.registerExtension({
 			};
 	
 			nodeType.prototype.pasteFile = function(file) {
-				if (file.type.startsWith("image/")) {
-					const is_pasted = (file.name === "image.png") &&
-									  (file.lastModified - Date.now() < 2000);
+				if (file.type.startsWith("video/mp4")) {
+
 					//uploadFile(file, true, is_pasted);
 
 					return true;

@@ -49,8 +49,9 @@ async function uploadFile(file, updateNode, node, pasted = false) {
 	}
 }
 
-function addVideo(node, name,src, app) {
+function addVideo(node, name,src, app,autoplay_value) {
 	const MIN_SIZE = 50;
+	
 	function computeSize(size) {
 		try{
 	
@@ -148,7 +149,7 @@ function addVideo(node, name,src, app) {
 
 	widget.inputEl = document.createElement("video");
 
-
+	
 	// Set the video attributes
 	Object.assign(widget.inputEl, {
 		controls: true,
@@ -158,11 +159,11 @@ function addVideo(node, name,src, app) {
 		height: 300,
 		loop: true,
 		muted: true,
-		autoplay:true,
+		autoplay: autoplay_value,
 		type : "video/mp4"
 		
 	});
-	widget.inputEl.classList.add("dididi");
+	//widget.inputEl.classList.add("dididi");
 
 
 	
@@ -273,44 +274,37 @@ export function showVideoOutput(name,node) {
 export const ExtendedComfyWidgets = {
     ...ComfyWidgets, // Copy all the functions from ComfyWidgets
 	
-	VIDEO(node, inputName, inputData, src, app,type="input") {
+	VIDEO(node, inputName, inputData, src, app,type="input",autoplay_value=true) {
 	try {	
 		const videoWidget = node.widgets.find((w) => w.name === "video");
+		const autoplay = node.widgets.find((w) => w.name === "autoplay");
 		const defaultVal = "";
 		let res;
-		res = addVideo(node, inputName, src, app);
+		res = addVideo(node, inputName, src, app,autoplay_value);
 		
 		if (type == "input"){
 
 			const cb = node.callback;
 			videoWidget.callback = function () {
+				
 				showVideoInput(videoWidget.value, node);
 				if (cb) {
 					return cb.apply(this, arguments);
 				}
 			};
+			autoplay.callback = function () {
+				const videoWidgetz = node.widgets.find((w) => w.name === "videoWidget");
+			
+				videoWidgetz.inputEl.autoplay = autoplay.value;
+				showVideoInput(videoWidget.value, node);
+				if (cb) {
+					return cb.apply(this, arguments);
+				}
+			}
 		}
 
 		if (node.type =="LoadVideo"){
-			// do this only on VideoLoad node!
-			let uploadWidget;
-			const fileInput = document.createElement("input");
-			Object.assign(fileInput, {
-				type: "file",
-				accept: "video/mp4,image/gif",
-				style: "display: none",
-				onchange: async () => {
-					if (fileInput.files.length) {
-						await uploadFile(fileInput.files[0], true,node);
-					}
-				},
-			});
-			document.body.append(fileInput);
-			// Create the button widget for selecting the files
-			uploadWidget = node.addWidget("button", "choose file to upload", "image", () => {
-				fileInput.click();
-			});
-			uploadWidget.serialize = false;
+	
 
 	}
 

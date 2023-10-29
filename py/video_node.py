@@ -329,7 +329,8 @@ class LoadVideo:
                               "size": ("INT", {"default": 512, "min": 512, "step": 64}),
                               "images_limit": ("INT", {"default": 0, "min": 0, "step": 1}),
                               "batch_size": ("INT", {"default": 0, "min": 0, "step": 1}),
-                            
+                              "starting_frame": ("INT", {"default": 0, "min": 0, "step": 1}), 
+                              "autoplay":("BOOLEAN",{"default": True} ),
                             },}
 
 
@@ -415,19 +416,41 @@ class LoadVideo:
         image = image_preprocessing(image)
         return torch.tensor(image)
     
-    def encode(self,video,framerate, local_url, resize_by, size, images_limit,batch_size):
+    def encode(self,video,framerate, local_url, resize_by, size, images_limit,batch_size,starting_frame,autoplay):
         metadata = []
         FRAMES,fps = self.load_video(video,framerate, local_url)
-        
-        #if images_limit > fps
-        if images_limit > fps:
-            print(f"{YELLOW}WARNING: The number of images to extract is greater than the number of frames in the video. Images_limit has been reduced to the number of frames. {END}")
-            images_limit = fps
+        max_frames = len(FRAMES)
 
-        #if batch_size > fps
-        if batch_size > fps:
+        
+      
+        if images_limit>0 and starting_frame>0:
+            images_limit = images_limit + starting_frame
+       
+        
+        #if images_limit==0:
+        #    images_limit = max_frames
+
+
+        print(f"images_limit {images_limit}")
+
+
+
+        #if starting frame is too high do the last frames only  
+        if starting_frame>max_frames:
+            starting_frame = max_frames-1
+            print(f"{YELLOW}WARNING: The starting frame is greater than the number of frames in the video. Only the last frame of the video will be used ({starting_frame}). {END}")
+
+
+        #if images_limit > max_frames
+        if images_limit > max_frames:
+            images_limit = max_frames
+            print(f"{YELLOW}WARNING: The number of images to extract is greater than the number of frames in the video. Images_limit has been reduced to the number of frames ({images_limit}). {END}")
+            
+
+        #if batch_size > max_frames
+        if batch_size > max_frames:
             print(f"{YELLOW}WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced. {END}")
-            batch_size = fps
+            batch_size = max_frames
 
        #if batch_size > images_limit
         if images_limit!=0 and batch_size > images_limit:
@@ -441,6 +464,7 @@ class LoadVideo:
         i_list = [] 
         i = 0
         o = 0
+        final_count_frame=0
         
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
@@ -449,25 +473,29 @@ class LoadVideo:
 
             for batch_start in range(0, len(FRAMES), pool_size):
                 batch_images = FRAMES[batch_start:batch_start + pool_size]
-                #remove audio if image_limit > 0
-                if images_limit != 0:
+                
+                #remove audio if image_limit > 0 or starting_frame>0
+                if images_limit != 0 or starting_frame != 0:
                     try:
                         os.remove(os.path.join(temp_output_dir,video.split(".")[0],"audio.mp3"))
                     except:
                         pass
-      
-                    if o >= images_limit:
-                        break
+        
+                    #if o >= images_limit:
+                    #    break
 
                 for image_path in batch_images:
-                    args = (image_path, width, height)
-                    futures.append(executor.submit(self.process_image, args))
-                    o += 1
-                    if images_limit != 0:
-                        if o >= images_limit:
-                            break
+                    # loop only when it reaches the starting_frame 
                     
-
+                    if o>=starting_frame and (o<images_limit or images_limit==0):
+                        args = (image_path, width, height)
+                        futures.append(executor.submit(self.process_image, args))
+                        final_count_frame += 1
+                        
+                    o += 1
+          
+                            
+                
                 i += len(batch_images)
 
             # Attendi il completamento delle operazioni in parallelo
@@ -481,8 +509,9 @@ class LoadVideo:
         i_tensor = torch.stack(i_list, dim=0)
        
 
-        if images_limit != 0:
-            b_size=images_limit
+        if images_limit != 0 or starting_frame != 0:
+            
+            b_size=final_count_frame
         else:
             b_size=len(FRAMES)
 
@@ -531,6 +560,7 @@ class SaveVideo:
                       "SaveVideo": ("BOOLEAN",{"default": False} ),
                       "SaveFrames": ("BOOLEAN",{"default": False} ),
                       "CompressionLevel":  ("INT", {"default": 2, "min": 0, "max":9, "step": 1}),
+                      
                      },
                 "hidden": {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"},
                 }

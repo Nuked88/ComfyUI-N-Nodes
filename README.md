@@ -1,5 +1,10 @@
 # ComfyUI-N-Nodes
-A suite of custom nodes for ComfyUI, for now i just put Integer, string and float variable nodes
+A suite of custom nodes for ComfyUI that includes Integer, string and float variable nodes, GPT nodes and video nodes.
+
+> [!IMPORTANT]  
+> These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
+**Any other environment has not been tested.**
+
 
 # Installation
 
@@ -22,9 +27,7 @@ ComfyUI will then automatically load all custom scripts and nodes at the start.
   - Delete the `ComfyUI-N-Nodes` folder in `custom_nodes`
 
 
-> [!IMPORTANT]  
-> These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
-**Any other environment has not been tested.**
+
 
 
 

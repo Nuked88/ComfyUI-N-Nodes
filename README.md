@@ -128,9 +128,9 @@ The node-variables are:
 
 ## 🤖 GPTLoaderSimple and GPTSampler 🤖
 
-These custom nodes are designed to enhance the capabilities of the ConfyUI framework by enabling text generation using GPTQ GPT models. This README provides an overview of the two custom nodes and their usage within ConfyUI.
+These custom nodes are designed to enhance the capabilities of the ConfyUI framework by enabling text generation using GGUF GPT models. This README provides an overview of the two custom nodes and their usage within ConfyUI.
 
-You can add in the _extra_model_paths.yaml_ the path where your model GPTQ are in this way (example):
+You can add in the _extra_model_paths.yaml_ the path where your model GGUF are in this way (example):
 
 `other_ui:
           base_path: I:\\text-generation-webui

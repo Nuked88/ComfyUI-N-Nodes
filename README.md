@@ -20,7 +20,7 @@ Since _llama-cpp-python_ needs to be compiled from source code to enable it to u
 ComfyUI will then automatically load all custom scripts and nodes at the start.  
 
 > [!NOTE]  
-> The llama-cpp-python installation will be done automatically by the script. If you have an NVIDIA GPU NO MORE CUDA BUILD IS NECESSARY thanks to jllllll(https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels/) repo.
+> The llama-cpp-python installation will be done automatically by the script. If you have an NVIDIA GPU NO MORE CUDA BUILD IS NECESSARY thanks to [jllllll](https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels/) repo.
 
 
 - For uninstallation:

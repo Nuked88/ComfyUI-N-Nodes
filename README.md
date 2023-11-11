@@ -1,3 +1,5 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C0AJECJ)
+
 # ComfyUI-N-Nodes
 A suite of custom nodes for ComfyUI that includes Integer, string and float variable nodes, GPT nodes and video nodes.
 
@@ -201,6 +203,12 @@ The node returns the generated prompt, which is a combination of the fixed promp
 
 - Just fill the `variable_prompt` field with tag comma separated, the `fixed_prompt` is optional
 
+
+
+
+## Troubleshooting
+
+- **SaveVideo - Preview not working**: is related to a conflict with animateDiff, i've already opened a [PR](https://github.com/ArtVentureX/comfyui-animatediff/pull/64) to solve this issue. Meanwhile you can download my patched version from [here](https://github.com/Nuked88/comfyui-animatediff)
 
 ## Contributing
 

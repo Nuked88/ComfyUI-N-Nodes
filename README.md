@@ -7,23 +7,23 @@ A suite of custom nodes for ComfyUI, for now i just put Integer, string and floa
 `git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
 to your ComfyUI `custom_nodes` directory
 
-2. **IMPORTANT**: If you want the GPT nodes on GPU you'll need to run **install_dependency bat files**. 
+2. ~~IMPORTANT: If you want the GPT nodes on GPU you'll need to run **install_dependency bat files**. 
 There are 2 versions: ***install_dependency_ggml_models.bat*** for the old ggmlv3 models and ***install_dependency_gguf_models.bat*** for all the new models (GGUF).
 YOU CAN ONLY USE ONE OF THEM AT A TIME!
-Since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python) . 
+Since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python).~~ 
 
-If you want the GPT nodes on CPU you'll need to run ***install_dependency_cpu_only_gguf_models.bat*** or ***install_dependency_cpu_only_ggml_models***
+ComfyUI will then automatically load all custom scripts and nodes at the start.  
 
-This bats are made for the official portable windows version of ComfyUI.
-
-   ComfyUI will then automatically load all custom scripts and nodes at the start.  
+> [!NOTE]  
+> The llama-cpp-python installation will be done automatically by the script. If you have an NVIDIA GPU NO MORE CUDA BUILD IS NECESSARY thanks to jllllll(https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels/) repo.
 
 
 - For uninstallation:
   - Delete the `ComfyUI-N-Nodes` folder in `custom_nodes`
 
-# Important
-These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
+
+> [!IMPORTANT]  
+> These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
 **Any other environment has not been tested.**
 
 

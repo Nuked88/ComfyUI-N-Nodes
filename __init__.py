@@ -8,10 +8,45 @@ import folder_paths
 import requests
 import subprocess
 import traceback
+import platform
+
+import torch
 
 
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
+
+def check_nvidia_gpu():
+    try:
+        # Utilizza torch per verificare la presenza di una GPU NVIDIA
+        return torch.cuda.is_available() and 'NVIDIA' in torch.cuda.get_device_name(0)
+    except Exception as e:
+        print(f"Error while checking for NVIDIA GPU: {e}")
+        return False
+
+def get_cuda_version():
+    try:
+        if torch.cuda.is_available():
+            cuda_version = torch.version.cuda.replace(".","").strip()
+
+            return "cu"+cuda_version
+        else:
+            return "No NVIDIA GPU available"
+    except Exception as e:
+        print(f"Error while checking CUDA version: {e}")
+        return "Unable to determine CUDA version"
+
+def check_avx2_support():
+    import cpuinfo
+    try:
+        info = cpuinfo.get_cpu_info()
+        return 'avx2' in info['flags']
+    except Exception as e:
+        print(f"Error while checking AVX2 support: {e}")
+        return False
+
+def get_python_version():
+    return platform.python_version()
 
 def check_and_install(package, import_name=""):
     if import_name == "":
@@ -21,12 +56,33 @@ def check_and_install(package, import_name=""):
         print(f"{import_name} is already installed.")
     except ImportError:
         print(f"{import_name} is not installed. Installing...")
-        install_package(package)
+        if package == "llama_cpp":
+            install_llama()
+        else:
+            install_package(package)
 
 def install_package(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", package])
 
+def install_llama():
+    gpu = check_nvidia_gpu()
+    avx2 = check_avx2_support()
+    python_version = get_python_version()
+    
 
+    #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117
+    if avx2:
+        avx="AVX2"
+    else:
+        avx="AVX"
+
+    if gpu:
+        cuda = get_cuda_version()
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall", "--no-deps" , f"--index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{avx}/{cuda}"])
+    else:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall"])
+
+# llama wheels https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels
 
 def check_module(package):
     import importlib
@@ -58,19 +114,22 @@ def downloader(link):
     zip_file.extractall(target_dir) 
 
 
-
-
-
   
 
 if init():
     py = get_ext_dir("py")
     files = glob.glob("*.py", root_dir=py, recursive=False)
+    check_and_install('py-cpuinfo',"cpuinfo")
+    check_and_install('gitpython','git')
     check_and_install('moviepy')
-    check_and_install("opencv-python","cv2")
-    check_and_install('git')
+    check_and_install("opencv-python","cv2") 
     check_and_install('zipfile')
     check_and_install('scikit-build',"skbuild")
+    #LLAMA DEPENTENCIES
+    check_and_install('typing')
+    check_and_install('diskcache')
+    check_and_install('llama_cpp')
+    
 
     #git clone https://github.com/hzwer/Practical-RIFE.git
     from git import Repo
@@ -78,8 +137,8 @@ if init():
         Repo.clone_from("https://github.com/hzwer/Practical-RIFE.git", os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle"))
     #if train_log folder not exists
     if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle","train_log")):
-        downloader("https://www.animecast.net/download/RIFE_trained_model_v4.7.zip")
-                   #"https://github.com/Nuked88/DreamingAI/raw/main/RIFE_trained_model_v4.7.zip")
+        downloader("https://github.com/Nuked88/DreamingAI/raw/main/RIFE_trained_model_v4.7.zip")
+                   
 
     for file in files:
         try:

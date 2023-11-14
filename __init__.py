@@ -67,7 +67,7 @@ def install_package(package):
 def install_llama():
     gpu = check_nvidia_gpu()
     avx2 = check_avx2_support()
-    python_version = get_python_version()
+    #python_version = get_python_version()
     
 
     #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117

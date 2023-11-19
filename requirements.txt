@@ -2,7 +2,6 @@ py-cpuinfo
 gitpython
 moviepy
 opencv-python
-zipfile
 scikit-build
 typing
 diskcache

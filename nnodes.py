@@ -6,8 +6,119 @@ import inspect
 import aiohttp
 from server import PromptServer
 from tqdm import tqdm
+import requests
+import subprocess
+import platform
+
+import torch
+
+
 
 config = None
+
+
+
+
+def check_nvidia_gpu():
+    try:
+        # Utilizza torch per verificare la presenza di una GPU NVIDIA
+        return torch.cuda.is_available() and 'NVIDIA' in torch.cuda.get_device_name(0)
+    except Exception as e:
+        print(f"Error while checking for NVIDIA GPU: {e}")
+        return False
+
+def get_cuda_version():
+    try:
+        if torch.cuda.is_available():
+            cuda_version = torch.version.cuda.replace(".","").strip()
+
+            return "cu"+cuda_version
+        else:
+            return "No NVIDIA GPU available"
+    except Exception as e:
+        print(f"Error while checking CUDA version: {e}")
+        return "Unable to determine CUDA version"
+
+def check_avx2_support():
+    import cpuinfo
+    try:
+        info = cpuinfo.get_cpu_info()
+        return 'avx2' in info['flags']
+    except Exception as e:
+        print(f"Error while checking AVX2 support: {e}")
+        return False
+
+def get_python_version():
+    return platform.python_version()
+
+def check_and_install(package, import_name=""):
+    if import_name == "":
+        import_name = package
+    try:
+        importlib.import_module(import_name)
+        print(f"{import_name} is already installed.")
+    except ImportError:
+        print(f"{import_name} is not installed. Installing...")
+        if package == "llama_cpp":
+            install_llama()
+        else:
+            install_package(package)
+
+def install_package(package):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", package])
+
+def install_llama():
+    gpu = check_nvidia_gpu()
+    avx2 = check_avx2_support()
+    #python_version = get_python_version()
+    
+
+    #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117
+    if avx2:
+        avx="AVX2"
+    else:
+        avx="AVX"
+
+    if gpu:
+        cuda = get_cuda_version()
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall", "--no-deps" , f"--index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{avx}/{cuda}"])
+    else:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall"])
+
+# llama wheels https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels
+
+def check_module(package):
+    import importlib
+    try:
+        print("Detected: ", package)
+        importlib.import_module(package)
+        return True
+    except ImportError:
+        return False
+import zipfile
+
+
+def downloader(link):
+    print("Downloading dependencies...")
+    response = requests.get(link, stream=True)
+    try:
+        os.makedirs(folder_paths.get_temp_directory())
+    except:
+        pass
+    temp_file = os.path.join(folder_paths.get_temp_directory(), "file.zip")
+    with open(temp_file, "wb") as f:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk: 
+                f.write(chunk) 
+
+    zip_file = zipfile.ZipFile(temp_file) 
+    target_dir = os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle") # Cartella dove estrarre lo zip
+
+    zip_file.extractall(target_dir) 
+
+
+
+
 
 def is_logging_enabled():
     config = get_extension_config()

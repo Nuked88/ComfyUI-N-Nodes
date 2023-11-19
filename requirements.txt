@@ -1,7 +1,8 @@
-make
+py-cpuinfo
+gitpython
 moviepy
 opencv-python
-git
 zipfile
 scikit-build
-llama-cpp-python
+typing
+diskcache

@@ -49,7 +49,38 @@ def check_avx2_support():
         return False
 
 def get_python_version():
-    return platform.python_version()
+    if "3.9" in platform.python_version():
+        return "39"
+    elif "3.10" in platform.python_version():
+        return "310"
+    elif "3.11" in platform.python_version():
+        return "311"
+    else:
+        return None
+
+
+def get_os():
+    return platform.system()
+
+def get_os_bit():
+    return platform.architecture()[0].replace("bit","")
+
+def get_platform_tag():
+    #return the first tag in the list of tags
+    try:
+        import packaging.tags
+        return list(packaging.tags.sys_tags())[0]
+    except:
+        return None
+def get_last_llcpppy_version():
+    try:
+        import requests
+    
+        response = requests.get("https://api.github.com/repos/abetlen/llama-cpp-python/releases/latest")
+        return response.json()["tag_name"] .replace("v","")
+    except:
+        return "0.2.20"
+
 
 def check_and_install(package, import_name=""):
     if import_name == "":
@@ -58,7 +89,7 @@ def check_and_install(package, import_name=""):
         importlib.import_module(import_name)
         print(f"{import_name} is already installed.")
     except ImportError:
-        print(f"{import_name} is not installed. Installing...")
+        print(f"Installing {import_name}...")
         if package == "llama_cpp":
             install_llama()
         else:
@@ -68,23 +99,36 @@ def install_package(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", package])
 
 def install_llama():
-    gpu = check_nvidia_gpu()
-    avx2 = check_avx2_support()
-    #python_version = get_python_version()
-    
+    try:
+        gpu = check_nvidia_gpu()
+        avx2 = check_avx2_support()
+        lcpVersion = get_last_llcpppy_version()
+        python_version = get_python_version()
+        os = get_os()
+        os_bit = get_os_bit()
+        platform_tag = get_platform_tag()
+        print(f"Python version: {python_version}")
+        print(f"OS: {os}")
+        print(f"OS bit: {os_bit}")
+        print(f"Platform tag: {platform_tag}")
+        if python_version == None:
+            print("Unsupported Python version. Please use Python 3.9, 3.10 or 3.11.")
+            return
+        
 
-    #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117
-    if avx2:
-        avx="AVX2"
-    else:
-        avx="AVX"
+        #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117
+        if avx2:
+            avx="AVX2"
+        else:
+            avx="AVX"
 
-    if gpu:
-        cuda = get_cuda_version()
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall", "--no-deps" , f"--index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{avx}/{cuda}"])
-    else:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall"])
-
+        if gpu:
+            cuda = get_cuda_version()
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall", "--no-deps" , f"--index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{avx}/{cuda}"])
+        else:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", f"https://github.com/abetlen/llama-cpp-python/releases/download/v{lcpVersion}/llama_cpp_python-{lcpVersion}-{platform_tag}.whl"])
+    except Exception as e:
+        print(f"Error while installing LLAMA: {e}")
 # llama wheels https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels
 
 def check_module(package):

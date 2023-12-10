@@ -16,6 +16,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {}
 if init():
     py = get_ext_dir("py")
     files = glob.glob("*.py", root_dir=py, recursive=False)
+    check_and_install('packaging')
     check_and_install('py-cpuinfo',"cpuinfo")
     check_and_install('gitpython','git')
     check_and_install('moviepy')

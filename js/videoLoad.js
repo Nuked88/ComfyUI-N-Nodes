@@ -70,7 +70,7 @@ app.registerExtension({
 			const fileInput = document.createElement("input");
 			Object.assign(fileInput, {
 				type: "file",
-				accept: "video/mp4,image/gif",
+				accept: "video/mp4,image/gif", // Add this to manage webm as well: video/webm
 				style: "display: none",
 				onchange: async () => {
 					if (fileInput.files.length) {

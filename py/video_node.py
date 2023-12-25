@@ -225,17 +225,20 @@ def extract_frames_from_video(video_path, output_folder, target_fps=30):
 
 
 def extract_frames_from_gif(gif_path, output_folder):
+    list_files = []
     os.makedirs(output_folder, exist_ok=True)
     
-    gif_frames = imageio.mimread(gif_path)
+    gif_frames = imageio.mimread(gif_path) # Add here this to avoid block when processing big gifs: memtest=False
     
     frame_count = 0
     for frame in gif_frames:
         frame_count += 1
         frame_filename = os.path.join(output_folder, f"{frame_count:07d}.png")
+        list_files.append(frame_filename)
         cv2.imwrite(frame_filename, cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
     print(f"{frame_count} frames have been extracted from the GIF and saved in {output_folder}")
+    return list_files
 
 def get_output_filename(input_file_path, output_folder, file_extension,suffix="") :
     existing_files = [f for f in os.listdir(output_folder)]
@@ -383,7 +386,7 @@ class LoadVideo:
         # Estract frames
         file_extension = os.path.splitext(file_path)[1].lower()
 
-        if file_extension == ".mp4":
+        if file_extension == ".mp4": # Add this condition to manage webm files as well: or file_extension == ".webm"
             list_files = extract_frames_from_video(file_path, full_temp_output_dir, target_fps=fps)
 
             audio_clip = VideoFileClip(file_path).audio
@@ -393,12 +396,10 @@ class LoadVideo:
             except:
                 print("Could not save audio")
                 pass
-
-            """        
+       
         elif file_extension == ".gif":
-            extract_frames_from_gif(file_path, output_dir)
+            list_files = extract_frames_from_gif(file_path, output_dir)
             #create_gif_from_frames(output_dir, output_video2)
-            """
         else:
             print("Format not supported. Please provide an MP4 or GIF file.")
 

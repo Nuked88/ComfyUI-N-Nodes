@@ -665,7 +665,7 @@ class LoadFramesFromFolder:
         image_list = []
         METADATA = [fps, len(os.listdir(folder)),"load"]
         
-        images = [os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(".png")]
+        images = [os.path.join(folder, filename) for filename in os.listdir(folder) if filename.endswith(".png") or filename.endswith(".jpg")]
         images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
         
         for image in images:

@@ -33,7 +33,7 @@ ComfyUI will automatically load all custom scripts and nodes at startup.
 > Since 14/02/2024, the node has undergone a massive rewrite, which also led to the change of all node names in order to avoid any conflicts with other extensions in the future (or at least I hope so). Consequently, the old workflows are no longer compatible and will require manual replacement of each node.
 > To avoid this, I have created a tool that allows for automatic replacement.
 > On Windows, simply drag any *.json workflow onto the migrate.bat file located in (custom_nodes/ComfyUI-N-Nodes), and another workflow with the suffix _migrated will be created in the same folder as the current workflow.
-> On Linux, you can use the script in the following way: migrate.py path/to/original/workflow/.
+> On Linux, you can use the script in the following way: python libs/migrate.py path/to/original/workflow/.
 > For security reasons, the original workflow will not be deleted."
 > For install the last version of this repository before this changes from the Comfyui-N-Suite execute **git checkout 29b2e43baba81ee556b2930b0ca0a9c978c47083**
 

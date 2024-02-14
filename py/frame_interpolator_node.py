@@ -310,13 +310,13 @@ class FrameInterpolator:
 
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "FrameInterpolator": FrameInterpolator,
+    "FrameInterpolator [n-suite]": FrameInterpolator,
 
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Video": "FrameInterpolator"
+    "FrameInterpolator [n-suite]": "FrameInterpolator [🅝-🅢🅤🅘🅣🅔]"
 }
 
 

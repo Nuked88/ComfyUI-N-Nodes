@@ -5,7 +5,7 @@ app.registerExtension({
 	name: "n.GPTSampler",
 	async beforeRegisterNodeDef(nodeType, nodeData, app) {
 		
-		if (nodeData.name === "GPTSampler") {
+		if (nodeData.name === "GPT Sampler [n-suite]") {
 			console.warn("GPTSampler detected")
 			
 			const onExecuted = nodeType.prototype.onExecuted;

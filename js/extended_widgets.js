@@ -303,7 +303,7 @@ export const ExtendedComfyWidgets = {
 			}
 		}
 
-		if (node.type =="LoadVideo"){
+		if (node.type =="LoadVideoAdvanced"){
 	
 
 	}

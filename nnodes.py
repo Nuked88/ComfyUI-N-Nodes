@@ -81,13 +81,29 @@ def get_last_llcpppy_version():
     except:
         return "0.2.20"
 
+from packaging import version
 
-def check_and_install(package, import_name=""):
+def check_and_install(package, import_name="", desired_version=None):
     if import_name == "":
         import_name = package
     try:
-        importlib.import_module(import_name)
-        print(f"{import_name} is already installed.")
+        library_module = importlib.import_module(import_name)
+        current_version  = getattr(library_module, '__version__', None)
+        if current_version :
+            if current_version:
+                print(f"Current version of {import_name}: {current_version}")
+            if desired_version:
+                if version.parse(current_version) < version.parse(desired_version):
+                    print(f"Updating {import_name} to version {desired_version}...")
+                    install_package(f"{package}=={desired_version}")
+                    print(f"{import_name} updated successfully to version {desired_version}")
+                else:
+                    print(f"{import_name} is already up-to-date with version {current_version}")
+
+        else:
+            print(f"Version of {import_name}: Version information not found")
+
+        
     except ImportError:
         print(f"Installing {import_name}...")
         if package == "llama_cpp":

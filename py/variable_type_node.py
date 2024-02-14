@@ -67,41 +67,36 @@ class FloatVariable:
         return (value,)
     
 class StringVariable:
-    
-    def __init__(self):
-        pass
-    
-    @classmethod
-    def INPUT_TYPES(s):
-        return {"required": {"value": ("STRING", {"multiline": True})}}
-
-
     RETURN_TYPES = ("STRING",)
     FUNCTION = "check"
     CATEGORY = "N-Suite/Variables"
+    @classmethod
+    def INPUT_TYPES(s):
+        return {"required": {"string": ("STRING", {"default": "", "multiline": True})}}
 
-    def check(self, value):
-        if value == "undefined":
-            value = ""
+
+
+
+    def check(self, string):
+        if string == "undefined":
+            string = ""
         #if not an int
-        if not str(value):
-            value = ""
+        if not str(string):
+            string = ""
         
-        
-
-        return (value,)
+        return (string,)
 
 # A dictionary that contains all nodes you want to export with their names
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "Integer Variable": IntVariable,
-    "Float Variable": FloatVariable,
-    "String Variable": StringVariable
+    "Integer Variable [n-suite]": IntVariable,
+    "Float Variable [n-suite]": FloatVariable,
+    "String Variable [n-suite]": StringVariable
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "Variables": "Integer Variable",
-    "Variables": "Float Variable",
-    "Variables": "String Variable"
+    "Integer Variable [n-suite]": "Integer Variable [🅝-🅢🅤🅘🅣🅔]",
+    "Float Variable [n-suite]": "Float Variable [🅝-🅢🅤🅘🅣🅔]",
+    "String Variable [n-suite]": "String Variable [🅝-🅢🅤🅘🅣🅔]"
 }

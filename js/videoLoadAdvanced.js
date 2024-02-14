@@ -55,11 +55,11 @@ async function uploadFile(file, updateNode, node, pasted = false) {
 
 let uploadWidget = "";
 app.registerExtension({
-	name: "Comfy.VideoLoad",
+	name: "Comfy.VideoLoadAdvanced",
 	async beforeRegisterNodeDef(nodeType, nodeData, app) {
 
 		const onAdded = nodeType.prototype.onAdded;
-		if (nodeData.name === "LoadVideo") {
+		if (nodeData.name === "LoadVideo [n-suite]") {
 		nodeType.prototype.onAdded = function () {
 			onAdded?.apply(this, arguments);
 			const temp_web_url = this.widgets.find((w) => w.name === "local_url");
@@ -70,7 +70,7 @@ app.registerExtension({
 			const fileInput = document.createElement("input");
 			Object.assign(fileInput, {
 				type: "file",
-				accept: "video/mp4,image/gif",
+				accept: "video/mp4,image/gif,video/webm",
 				style: "display: none",
 				onchange: async () => {
 					if (fileInput.files.length) {

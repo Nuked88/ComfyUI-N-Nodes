@@ -186,6 +186,14 @@ This nodes actually supports 4 different models:
  - Moondream
  - Joytag
 
+
+#### GGUF LLM
+
+The GGUF models can be downloaded from the [Huggingface Hub](https://huggingface.co/models?search=gguf)
+
+[HERE](https://www.youtube.com/watch?v=gzTqXbF0S-w) a video of an example of how to use the GGUF models by [boricuapab](https://github.com/boricuapab)
+
+
 #### Llava
 Here a small list of the models supported by this nodes:
 

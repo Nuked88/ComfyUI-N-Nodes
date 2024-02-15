@@ -57,9 +57,12 @@ ComfyUI will automatically load all custom scripts and nodes at startup.
 ## 📽️ Video Nodes 📽️
 
 ### LoadVideo
+
+![alt text](./img/image-13.png)
+
 The LoadVideoAdvanced node allows loading a video file and extracting frames from it.
 The name has been changed from `LoadVideo` to `LoadVideoAdvanced` in order to avoid conflicts with the `LoadVideo` animatediff node.
-![alt text](./img/image-13.png)
+
 
 #### Input Fields
 - `video`: Select the video file to load.
@@ -100,8 +103,11 @@ The node takes extracted frames and metadata and can save them as a new video fi
 NOTE: If you are using **LoadVideo** as source of the frames, the audio of the original file will be maintained but only in case **images_limit** and **starting_frame** are equal to Zero.
 
 ### LoadFramesFromFolder
-![alt text](image.png)
+
+![alt text](./img/image.png)
+
 The LoadFramesFromFolder node allows loading image frames from a folder and returning them as a batch.
+
 
 #### Input Fields
 - `folder`: Path to the folder containing the frame images.Must be png format, named with a number (eg. 1.png or even 0001.png).The images will be loaded sequentially.
@@ -116,13 +122,18 @@ The node loads all image files from the specified folder, converts them to PyTor
 This allows easily loading a set of frames that were extracted and saved previously, for example, to reload and process them again. By setting the FPS value, the frames can be properly interpreted as a video sequence.
 
 ### SetMetadataForSaveVideo
+
 ![alt text](./img/image-1.png)
+
 The SetMetadataForSaveVideo node allows setting metadata for the SaveVideo node.
 
 ### FrameInterpolator
 
-The FrameInterpolator node allows interpolating between extracted video frames to increase the frame rate and smooth motion.
 ![alt text](./img/image-4.png)
+
+The FrameInterpolator node allows interpolating between extracted video frames to increase the frame rate and smooth motion.
+
+
 #### Input Fields
 
 - `images`: Extracted frame images as tensors.
@@ -205,9 +216,11 @@ The code taken from [this repository](https://github.com/fpgaminer/joytag)
 
 ### GPTLoaderSimple
 
+![alt text](./img/image11.png)
+
 The `GPTLoaderSimple` node is responsible for loading GPT model checkpoints and creating an instance of the Llama library for text generation. It provides an interface to configure GPU layers, the number of threads, and maximum context for text generation.
 
-![alt text](./img/image11.png)
+
 
 #### Input Fields
 
@@ -222,9 +235,11 @@ The node returns an instance of the Llama library (MODEL) and the path to the lo
 
 ### GPTSampler
 
+![alt text](./img/image-8.png)
+
 The `GPTSampler` node facilitates text generation using GPT models based on the input prompt and various generation parameters. It allows you to control aspects like temperature, top-p sampling, penalties, and more.
 
-![alt text](./img/image-8.png)
+
 #### Input Fields
 
 - `prompt`: Enter the input prompt for text generation.

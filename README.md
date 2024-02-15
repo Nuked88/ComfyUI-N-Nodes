@@ -59,7 +59,8 @@ ComfyUI will automatically load all custom scripts and nodes at startup.
 ### LoadVideo
 The LoadVideoAdvanced node allows loading a video file and extracting frames from it.
 The name has been changed from `LoadVideo` to `LoadVideoAdvanced` in order to avoid conflicts with the `LoadVideo` animatediff node.
-![alt text](img\image-13.png)
+![alt text](./img/image-13.png)
+
 #### Input Fields
 - `video`: Select the video file to load.
 - `framerate`: Choose whether to keep the original framerate or reduce to half or quarter speed.
@@ -85,7 +86,7 @@ The node extracts frames from the input video at the specified framerate. It res
 
 ### SaveVideo
 The SaveVideo node takes in extracted frames and saves them back as a video file.
-![alt text](img\image-3.png)
+![alt text](./img/image-3.png)
 #### Input Fields
 - `images`: Frame images as tensors.
 - `METADATA`: Metadata from LoadVideo node.
@@ -115,13 +116,13 @@ The node loads all image files from the specified folder, converts them to PyTor
 This allows easily loading a set of frames that were extracted and saved previously, for example, to reload and process them again. By setting the FPS value, the frames can be properly interpreted as a video sequence.
 
 ### SetMetadataForSaveVideo
-![alt text](img\image-1.png)
+![alt text](./img/image-1.png)
 The SetMetadataForSaveVideo node allows setting metadata for the SaveVideo node.
 
 ### FrameInterpolator
 
 The FrameInterpolator node allows interpolating between extracted video frames to increase the frame rate and smooth motion.
-![alt text](img\image-4.png)
+![alt text](./img/image-4.png)
 #### Input Fields
 
 - `images`: Extracted frame images as tensors.
@@ -184,7 +185,7 @@ Here a small list of the models supported by this nodes:
 [Nous Hermes 2 Vision](https://huggingface.co/billborkowski/llava-NousResearch_Nous-Hermes-2-Vision-GGUF)
 
 ####Example with Llava model:
-![alt text](img\image-5.png)
+![alt text](./img/image-5.png)
 
 #### Moondream
 The model will be automatically downloaded when you run the first time.
@@ -192,7 +193,7 @@ Anyway, it is available [HERE](https://huggingface.co/vikhyatk/moondream1/tree/m
 The code taken from [this repository](https://github.com/vikhyat/moondream)
 
 ####Example with Moondream model:
-![alt text](img\image-6.png)
+![alt text](./img/image-6.png)
 
 #### Joytag
 The model will be automatically downloaded when you run the first time.
@@ -200,13 +201,13 @@ Anyway, it is available [HERE](https://huggingface.co/fancyfeast/joytag/tree/mai
 The code taken from [this repository](https://github.com/fpgaminer/joytag)
 
 ####Example with Joytag model:
-![alt text](img\image-7.png)
+![alt text](./img/image-7.png)
 
 ### GPTLoaderSimple
 
 The `GPTLoaderSimple` node is responsible for loading GPT model checkpoints and creating an instance of the Llama library for text generation. It provides an interface to configure GPU layers, the number of threads, and maximum context for text generation.
 
-![alt text](img\image11.png)
+![alt text](./img/image11.png)
 
 #### Input Fields
 
@@ -223,7 +224,7 @@ The node returns an instance of the Llama library (MODEL) and the path to the lo
 
 The `GPTSampler` node facilitates text generation using GPT models based on the input prompt and various generation parameters. It allows you to control aspects like temperature, top-p sampling, penalties, and more.
 
-![alt text](img\image-8.png)
+![alt text](./img/image-8.png)
 #### Input Fields
 
 - `prompt`: Enter the input prompt for text generation.
@@ -250,7 +251,7 @@ The node returns the generated text along with a UI-friendly representation.
 
 ## Dynamic Prompt
 
-![alt text](img\image-9.png)
+![alt text](./img/image-9.png)
 
 The `DynamicPrompt` node generates prompts by combining a fixed prompt with a random selection of tags from a variable prompt. This enables flexible and dynamic prompt generation for various use cases.
 
@@ -273,7 +274,7 @@ The node returns the generated prompt, which is a combination of the fixed promp
 
 ## CLIP Text Encode Advanced
 
-![alt text](img\image-10.png)
+![alt text](./img/image-10.png)
 
 The `CLIP Text Encode Advanced` node is an alternative to the standard `CLIP Text Encode` node. It offers support for Add/Replace/Delete styles, allowing for the inclusion of both positive and negative prompts within a single node.
 
@@ -306,3 +307,4 @@ Feel free to contribute to this project by reporting issues or suggesting improv
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+

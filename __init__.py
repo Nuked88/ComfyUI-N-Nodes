@@ -42,8 +42,8 @@ if init():
     if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","moondream_repo")):
         repo = Repo.clone_from("https://github.com/Nuked88/moondream.git", os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","moondream_repo"))
 
-        commit_hash = "38af98596e59f2a6c25c6b52b2bd5a672dab4144"
-        repo.git.checkout(commit_hash)
+        #commit_hash = "38af98596e59f2a6c25c6b52b2bd5a672dab4144"
+        #repo.git.checkout(commit_hash)
 
 
     #if train_log folder not exists

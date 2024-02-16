@@ -6,19 +6,19 @@ from llama_cpp.llama_chat_format import Llava15ChatHandler
 from pathlib import Path
 import sys
 import torch
-from huggingface_hub import snapshot_download
+from huggingface_hub import snapshot_download, hf_hub_download
 sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs"))
 import joytag_models
 from moondream_repo.moondream.moondream import Moondream
 from PIL import Image
-from huggingface_hub import hf_hub_download
 from transformers import CodeGenTokenizerFast as Tokenizer
+#,AutoTokenizer, AutoModelForCausalLM
 import numpy as np
 import base64
 
 models_base_path = os.path.join(folder_paths.models_dir, "GPTcheckpoints")
 _choice = ["YES", "NO"]
-_folders_whitelist = ["moondream","joytag"]
+_folders_whitelist = ["moondream","joytag"]#,"internlm"]
 
 
 def env_or_def(env, default):
@@ -140,10 +140,6 @@ def run_moondream(image, prompt, max_tags, model_funct):
     from PIL import Image
     moondream = model_funct[0]
     tokenizer = model_funct[1]
-    result=[]
-
-
-
     im=tensor2pil(image)
 
     image_embeds = moondream.encode_image(im)
@@ -152,11 +148,85 @@ def run_moondream(image, prompt, max_tags, model_funct):
     except ValueError:
         print("\n\n\n")
         raise ModuleNotFoundError("Please run install_extra.bat in custom_nodes/ComfyUI-N-Nodes folder to make sure to have the required verision of Transformers installed (4.36.2).")
-    result.append(res)
 
 
-    return (result,)
 
+    return res
+
+"""
+def load_internlm(ckpt_path,cpu=False):
+    
+    
+    
+    local_dir=os.path.join(os.path.join(models_base_path,"internlm"))
+    local_model_1 = os.path.join(local_dir,"pytorch_model-00001-of-00002.bin")
+    local_model_2 = os.path.join(local_dir,"pytorch_model-00002-of-00002.bin")
+        
+    if os.path.exists(local_model_1) and os.path.exists(local_model_2):
+        model_path = local_dir
+    else:
+        model_path = snapshot_download("internlm/internlm-xcomposer2-vl-7b", local_dir=local_dir, revision="f8e6ab8d7ff14dbd6b53335c93ff8377689040bf", local_dir_use_symlinks=False)
+
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
+    
+    if torch.cuda.is_available() and cpu == False:
+            
+            model = AutoModelForCausalLM.from_pretrained(
+                model_path, 
+                torch_dtype="auto", 
+                trust_remote_code=True,
+                device_map="auto"
+            ).eval()
+
+    else:
+        model = model.cpu().float().eval()
+        
+    model.tokenizer = tokenizer
+
+    #device = device
+    #dtype = dtype
+    name = "internlm"
+    #low_memory = low_memory
+    
+    return ([model, tokenizer])
+
+
+def run_internlm(image, prompt, max_tags, model_funct):
+    model = model_funct[0]
+    tokenizer = model_funct[1]
+    low_memory = True
+    import tempfile
+    image = Image.fromarray(np.clip(255. * image[0].cpu().numpy(),0,255).astype(np.uint8))
+    #image = model.vis_processor(image)
+    temp_dir = tempfile.mkdtemp()
+    image_path = os.path.join(temp_dir,"input.jpg")
+    image.save(image_path)
+    #image = tensor2pil(image)
+    if torch.cuda.is_available():
+        with torch.cuda.amp.autocast(): 
+            response, _ = model.chat(
+                    query=prompt, 
+                    image=image_path, 
+                    tokenizer= tokenizer,
+                    history=[], 
+                    do_sample=True
+                        )
+        if low_memory:
+            torch.cuda.empty_cache()
+            print(f"Memory usage: {torch.cuda.memory_allocated() / 1024 ** 3:.2f} GB")
+            model.to("cpu", dtype=torch.float16)
+            print(f"Memory usage: {torch.cuda.memory_allocated() / 1024 ** 3:.2f} GB")
+    else:
+        response, _ = model.chat(
+                query=prompt,
+                image=image, 
+                tokenizer= tokenizer,
+                history=[], 
+                do_sample=True
+            )
+
+    return response
+ """   
 
      
 
@@ -195,6 +265,10 @@ if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","joy
 if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","moondream")):
         os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","moondream"))
 
+"""#internlm
+if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","internlm")):
+        os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","internlm"))
+"""
 if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava")):
         os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava"))
 
@@ -423,6 +497,3 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Llava Clip Loader [n-suite]": "Llava Clip Loader [🅝-🅢🅤🅘🅣🅔]"
 
 }
-
-
-

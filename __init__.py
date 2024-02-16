@@ -31,8 +31,12 @@ if init():
     check_and_install('diskcache')
     check_and_install('llama_cpp')
     check_and_install('timm',"timm","0.9.12")
+    #check_and_install('sentencepiece')
+    #check_and_install("accelerate")
     #check_and_install('transformers','transformers',"4.36.2")
     
+    
+
 
     #git clone https://github.com/hzwer/Practical-RIFE.git
     from git import Repo
@@ -45,6 +49,11 @@ if init():
         #commit_hash = "38af98596e59f2a6c25c6b52b2bd5a672dab4144"
         #repo.git.checkout(commit_hash)
 
+    #if file moondream.py not exist 
+    #if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","moondream_repo","moondream","moondream.py")):
+    #    #delete moondream_repo and download repo again
+    #    shutil.rmtree(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","moondream_repo"))
+    #    repo = Repo.clone_from("https://github.com/Nuked88/moondream.git", os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","moondream_repo"))
 
     #if train_log folder not exists
     if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle","train_log")):

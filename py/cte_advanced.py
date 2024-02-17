@@ -151,7 +151,7 @@ class CLIPTextEncodeAdvancedNSuite:
     RETURN_NAMES = ("positive", "negative")
     FUNCTION = "encode"
 
-    CATEGORY = "N-Suite/Conditioning"
+    CATEGORY = "N-Suite/Experimental"
 
     def encode(self, clip, positive_prompt, negative_prompt,styles):
         p_tokens = clip.tokenize(positive_prompt)

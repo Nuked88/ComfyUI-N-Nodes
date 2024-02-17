@@ -304,6 +304,7 @@ The `CLIP Text Encode Advanced` node is an alternative to the standard `CLIP Tex
 The base style file is called `n-styles.csv` and is located in the `ComfyUI\styles` folder.
 The styles file follows the same format as the current `styles.csv` file utilized in A1111 (at the time of writing).
 
+NOTE: this note is experimental and still have alot of bugs
 
 #### Input Fields
 

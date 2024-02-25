@@ -272,6 +272,34 @@ The `GPTSampler` node facilitates text generation using GPT models based on the 
 The node returns the generated text along with a UI-friendly representation.
 
 
+## Image Pad For Outpainting Advanced 
+![alt text](./img/image-14.png)
+
+The `ImagePadForOutpaintingAdvanced` node is an alternative to the `ImagePadForOutpainting` node that applies the technique seen in [this video](https://www.youtube.com/@robadams2451) under the outpainting mask.
+The color correction part was taken from [this](https://github.com/sipherxyz/comfyui-art-venture) custom node from Sipherxyz
+
+#### Input Fields
+
+- `image`: Image input.
+- `left`: pixel to extend from left,
+- `top`: pixel to extend from top,
+- `right`: pixel to extend from right,
+- `bottom`: pixel to extend from bottom.
+- `feathering`: feathering strength
+- `noise`: blend strenght from noise and the copied border
+- `pixel_size`: how big will be the pixel in the pixellated effect
+- `pixel_to_copy`: how many pixels to copy (from each side)
+- `temperature`: color correction setting that is only applied to the mask part.
+- `hue`: color correction setting that is only applied to the mask part.
+- `brightness`: color correction setting that is only applied to the mask part.
+- `contrast`: color correction setting that is only applied to the mask part.
+- `saturation`: color correction setting that is only applied to the mask part.
+- `gamma`: color correction setting that is only applied to the mask part.
+
+#### Output
+
+The node returns the processed image and the mask.
+
 ## Dynamic Prompt
 
 ![alt text](./img/image-9.png)
@@ -295,7 +323,7 @@ The node returns the generated prompt, which is a combination of the fixed promp
 - Just fill the `variable_prompt` field with tag comma separated, the `fixed_prompt` is optional
 
 
-## CLIP Text Encode Advanced
+## CLIP Text Encode Advanced (Experimental)
 
 ![alt text](./img/image-10.png)
 

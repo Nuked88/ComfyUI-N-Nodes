@@ -20,6 +20,7 @@ YOU CAN ONLY USE ONE OF THEM AT A TIME!
 Since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python).~~ 
 
 3. If you intend to use GPTLoaderSimple with the Moondream model, you'll need to execute the 'install_extra.bat' script, which will install transformers version 4.36.2.
+4. Reboot ComfyUI
 
 In case you need to revert these changes (due to incompatibility with other nodes), you can utilize the 'remove_extra.bat' script.
 

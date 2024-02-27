@@ -77,7 +77,9 @@ def get_last_llcpppy_version():
         import requests
     
         response = requests.get("https://api.github.com/repos/abetlen/llama-cpp-python/releases/latest")
-        return response.json()["tag_name"] .replace("v","")
+        
+        
+        return response.json()["tag_name"].replace("v","")
     except:
         return "0.2.20"
 
@@ -308,7 +310,7 @@ def init(check_imports=None):
                     type="ERROR", always=True)
                 return False
 
-    install_js()
+    #install_js()
     return True
 
 

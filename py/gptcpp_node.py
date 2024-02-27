@@ -9,7 +9,12 @@ import torch
 from huggingface_hub import snapshot_download, hf_hub_download
 sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs"))
 import joytag_models
-from moondream_repo.moondream.moondream import Moondream
+try:
+    from moondream_repo.moondream.moondream import Moondream
+    moondream_loaded = True
+except Exception as e:
+    moondream_loaded = False
+    print(f"Moondream error: You should probably run install_extra.bat (windows) or install transformers==4.36.2 in the enviroment.\n Also torch must be >= 2.1.0 (ERROR: {e})")
 from PIL import Image
 from transformers import CodeGenTokenizerFast as Tokenizer
 #,AutoTokenizer, AutoModelForCausalLM
@@ -33,15 +38,18 @@ def get_model_path(folder_list, model_name):
         
 def get_model_list(models_base_path,supported_gpt_extensions):
     all_models = []
-    for file in os.listdir(models_base_path):
-        
-        if os.path.isdir(os.path.join(models_base_path, file)):
-            if  file in _folders_whitelist:
-                all_models.append(os.path.join(models_base_path, file))
-        
-        else:
-            if file.endswith(tuple(supported_gpt_extensions)):
-                all_models.append(os.path.join(models_base_path, file))
+    try:
+        for file in os.listdir(models_base_path):
+            
+            if os.path.isdir(os.path.join(models_base_path, file)):
+                if  file in _folders_whitelist:
+                    all_models.append(os.path.join(models_base_path, file))
+            
+            else:
+                if file.endswith(tuple(supported_gpt_extensions)):
+                    all_models.append(os.path.join(models_base_path, file))
+    except:
+        print(f"Path {models_base_path} not valid.")
     return all_models
 
 
@@ -66,8 +74,15 @@ def detect_device():
 
 
 def load_joytag(ckpt_path,cpu=False):
-    print("JOYTAG MODEL DETECTED")        
-    snapshot_download("fancyfeast/joytag",local_dir = os.path.join(models_base_path,"joytag"))
+    print("JOYTAG MODEL DETECTED")
+    jt_config = os.path.join(models_base_path,"joytag","config.json")
+    jt_readme= os.path.join(models_base_path,"joytag","README.md")
+    jt_top_tags= os.path.join(models_base_path,"joytag","top_tags.txt")
+    jt_model= os.path.join(models_base_path,"joytag","model.safetensors")
+
+
+    #if os.path.exists(jt_config)==False or os.path.exists(jt_readme)==False or os.path.exists(jt_top_tags)==False or os.path.exists(jt_model)==False:
+    snapshot_download("fancyfeast/joytag",local_dir = os.path.join(models_base_path,"joytag"),local_dir_use_symlinks = False,)
     model = joytag_models.VisionModel.load_model(ckpt_path)
     model.eval()
     if cpu:
@@ -124,9 +139,13 @@ def load_moondream(ckpt_path,cpu=False):
                                    filename="tokenizer.json",
                                    endpoint='https://hf-mirror.com')
     
-    tokenizer = Tokenizer.from_pretrained(os.path.join(models_base_path,"moondream"))
-    moondream = Moondream.from_pretrained(os.path.join(models_base_path,"moondream")).to(device=device, dtype=dtype)
-    moondream.eval()
+    if moondream_loaded:
+        tokenizer = Tokenizer.from_pretrained(os.path.join(models_base_path,"moondream"))
+        moondream = Moondream.from_pretrained(os.path.join(models_base_path,"moondream")).to(device=device, dtype=dtype)
+        moondream.eval()
+    else:
+        tokenizer=None
+        moondream=None
 
 
 

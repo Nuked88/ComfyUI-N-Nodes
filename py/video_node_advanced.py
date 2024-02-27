@@ -547,7 +547,6 @@ class SaveVideo:
      
     @classmethod
     def INPUT_TYPES(s):
-        s.video_file_path,s.video_filename = get_output_filename_video("video", videos_output_dir, ".mp4")
         
         try:
             shutil.rmtree(frames_output_dir)
@@ -562,6 +561,7 @@ class SaveVideo:
                      "METADATA": ("STRING",  {"default": "", "forceInput": True}  ),  
                       "SaveVideo": ("BOOLEAN",{"default": False} ),
                       "SaveFrames": ("BOOLEAN",{"default": False} ),
+                      "filename_prefix": ("STRING",{"default": "video"} ),
                       "CompressionLevel":  ("INT", {"default": 2, "min": 0, "max":9, "step": 1}),
                       
                      },
@@ -576,8 +576,10 @@ class SaveVideo:
 
     CATEGORY = "N-Suite/Video"
 
-    def save_video(self, images,METADATA,SaveVideo,SaveFrames, CompressionLevel, prompt=None, extra_pnginfo=None):
+    def save_video(self, images,METADATA,SaveVideo,SaveFrames,filename_prefix, CompressionLevel, prompt=None, extra_pnginfo=None):
  
+        self.video_file_path,self.video_filename = get_output_filename_video(filename_prefix, videos_output_dir, ".mp4")
+
         fps = METADATA[0]
         frame_number = METADATA[1]
         video_filename_original = METADATA[2]

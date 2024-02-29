@@ -660,14 +660,15 @@ class LoadFramesFromFolder:
                              }}
     
 
-    RETURN_TYPES = ("IMAGE","STRING","INT","INT","INT",)
-    RETURN_NAMES = ("IMAGES","METADATA","MAX WIDTH","MAX HEIGHT","FRAME COUNT")
+    RETURN_TYPES = ("IMAGE","STRING","INT","INT","INT","STRING","STRING",)
+    RETURN_NAMES = ("IMAGES","METADATA","MAX WIDTH","MAX HEIGHT","FRAME COUNT","PATH","IMAGE LIST")
     FUNCTION = "load_images"
-    OUTPUT_IS_LIST = (True,False,False,False,False,)
+    OUTPUT_IS_LIST = (True,False,False,False,False,False,False,)
     CATEGORY = "N-Suite/Video"
 
     def load_images(self, folder,fps):
         image_list = []
+        image_names = []
         max_width = 0
         max_height = 0
         frame_count = 0
@@ -677,6 +678,8 @@ class LoadFramesFromFolder:
         images.sort(key=lambda f: int(''.join(filter(str.isdigit, f))))
         
         for image_path in images:
+            #get image name
+            image_names.append(image_path.split("/")[-1])
             image = Image.open(image_path)
             width, height = image.size
             max_width = max(max_width, width)
@@ -684,9 +687,10 @@ class LoadFramesFromFolder:
             image_list.append((image_preprocessing(image)))
             frame_count += 1
     
+        image_names_final='\n'.join(image_names)
         print (f"Details: {frame_count} frames, {max_width}x{max_height}")
 
-        return (image_list,METADATA, max_width, max_height,frame_count,)
+        return (image_list,METADATA, max_width, max_height,frame_count,folder,image_names_final,)
     
 class SetMetadata:
     def __init__(self):

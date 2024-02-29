@@ -13,11 +13,63 @@ import importlib.util
 import torch
 import folder_paths
 import sys
+import git
+
 
 config = None
 
+class color:
+        END = '\33[0m'
+        BOLD = '\33[1m'
+        ITALIC = '\33[3m'
+        UNDERLINE = '\33[4m'
+        BLINK = '\33[5m'
+        BLINK2 = '\33[6m'
+        SELECTED = '\33[7m'
+
+        BLACK = '\33[30m'
+        RED = '\33[31m'
+        GREEN = '\33[32m'
+        YELLOW = '\33[33m'
+        BLUE = '\33[34m'
+        VIOLET = '\33[35m'
+        BEIGE = '\33[36m'
+        WHITE = '\33[37m'
+
+        BLACKBG = '\33[40m'
+        REDBG = '\33[41m'
+        GREENBG = '\33[42m'
+        YELLOWBG = '\33[43m'
+        BLUEBG = '\33[44m'
+        VIOLETBG = '\33[45m'
+        BEIGEBG = '\33[46m'
+        WHITEBG = '\33[47m'
+
+        GREY = '\33[90m'
+        LIGHTRED = '\33[91m'
+        LIGHTGREEN = '\33[92m'
+        LIGHTYELLOW = '\33[93m'
+        LIGHTBLUE = '\33[94m'
+        LIGHTVIOLET = '\33[95m'
+        LIGHTBEIGE = '\33[96m'
+        LIGHTWHITE = '\33[97m'
+
+        GREYBG = '\33[100m'
+        LIGHTREDBG = '\33[101m'
+        LIGHTGREENBG = '\33[102m'
+        LIGHTYELLOWBG = '\33[103m'
+        LIGHTBLUEBG = '\33[104m'
+        LIGHTVIOLETBG = '\33[105m'
+        LIGHTBEIGEBG = '\33[106m'
+        LIGHTWHITEBG = '\33[107m'
 
 
+def get_commit():
+    try:
+        repo = git.Repo( os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes"))
+        return repo.head.object.hexsha[:8]
+    except:
+        return 0
 
 def check_nvidia_gpu():
     try:
@@ -85,7 +137,7 @@ def get_last_llcpppy_version():
 
 from packaging import version
 
-def check_and_install(package, import_name="", desired_version=None):
+def check_and_install(package, import_name="", desired_version=None,reboot=False):
     if import_name == "":
         import_name = package
     try:
@@ -99,11 +151,11 @@ def check_and_install(package, import_name="", desired_version=None):
                     print(f"Updating {import_name} to version {desired_version}...")
                     install_package(f"{package}=={desired_version}")
                     print(f"{import_name} updated successfully to version {desired_version}")
-                else:
-                    print(f"{import_name} is already up-to-date with version {current_version}")
+                #else:
+                #    print(f"{import_name} is already up-to-date with version {current_version}")
 
         else:
-            print(f"Version of {import_name}: Version information not found")
+            print(f"Version of {import_name}: Not found")
 
         
     except ImportError:
@@ -112,6 +164,10 @@ def check_and_install(package, import_name="", desired_version=None):
             install_llama()
         else:
             install_package(package)
+            if reboot:
+                print(f"{color.RED}------------------------------------------{color.END}")
+                print(f"{color.RED}IMPORTANT: Please reboot ComfyUI!{color.END}")
+                print(f"{color.RED}------------------------------------------{color.END}")
 
 def install_package(package):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", package])
@@ -199,7 +255,7 @@ def log(message, type=None, always=False, name=None):
     if name is None:
         name = get_extension_config()["name"]
 
-    print(f"(nnodes:{name}) {message}")
+    print(f"{name}: {message}")
 
 
 def get_ext_dir(subpath=None, mkdir=False):
@@ -226,76 +282,20 @@ def get_comfy_dir(subpath=None, mkdir=False):
     return dir
 
 
-def get_web_ext_dir():
-    config = get_extension_config()
-    name = config["name"]
-    dir = get_comfy_dir("web/extensions/comfyui-n-nodes")
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    dir = os.path.join(dir, name)
-    return dir
 
 def get_extension_config(reload=False):
     global config
     if reload == False and config is not None:
         return config
 
-    config_path = get_ext_dir("nnodes.json")
+    config_path = get_ext_dir("config.json")
     if not os.path.exists(config_path):
-        log("Missing nnodes.json, this extension may not work correctly. Please reinstall the extension.",
-            type="ERROR", always=True, name="???")
+        log("Missing config.json, this extension may not work correctly. Please reinstall the extension.", type="ERROR", always=True, name="???")
         print(f"Extension path: {get_ext_dir()}")
         return {"name": "Unknown", "version": -1}
     with open(config_path, "r") as f:
         config = json.loads(f.read())
     return config
-
-
-
-def link_js(src, dst):
-    src = os.path.abspath(src)
-    dst = os.path.abspath(dst)
-    if os.name == "nt":
-        try:
-            import _winapi
-            _winapi.CreateJunction(src, dst)
-            return True
-        except:
-            pass
-    try:
-        os.symlink(src, dst)
-        return True
-    except:
-        import logging
-        logging.exception('')
-        return False
-
-def is_junction(path):
-    if os.name != "nt":
-        return False
-    try:
-        return bool(os.readlink(path))
-    except OSError:
-        return False
-
-def install_js():
-    src_dir = get_ext_dir("js")
-    if not os.path.exists(src_dir):
-        log("No JS")
-        return
-
-    dst_dir = get_web_ext_dir()
-
-    if os.path.exists(dst_dir):
-        if os.path.islink(dst_dir) or is_junction(dst_dir):
-            log("JS already linked")
-            return
-    elif link_js(src_dir, dst_dir):
-        log("JS linked")
-        return
-
-    log("Copying JS files")
-    shutil.copytree(src_dir, dst_dir, dirs_exist_ok=True)
 
 
 def init(check_imports=None):
@@ -310,7 +310,7 @@ def init(check_imports=None):
                     type="ERROR", always=True)
                 return False
 
-    #install_js()
+   
     return True
 
 
@@ -361,8 +361,6 @@ async def download_to_file(url, destination, update_callback=None, is_ext_subpat
         destination = get_ext_dir(destination)
     with open(destination, mode='wb') as f:
         download(url, f, update_callback, session)
-
-
 
 
 def is_inside_dir(root_dir, check_path):

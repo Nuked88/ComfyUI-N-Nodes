@@ -91,6 +91,7 @@ The node extracts frames from the input video at the specified framerate. It res
 ### SaveVideo
 The SaveVideo node takes in extracted frames and saves them back as a video file.
 ![alt text](./img/image-3.png)
+
 #### Input Fields
 - `images`: Frame images as tensors.
 - `METADATA`: Metadata from LoadVideo node.
@@ -104,7 +105,6 @@ The node takes extracted frames and metadata and can save them as a new video fi
 NOTE: If you are using **LoadVideo** as source of the frames, the audio of the original file will be maintained but only in case **images_limit** and **starting_frame** are equal to Zero.
 
 ### LoadFramesFromFolder
-
 ![alt text](./img/image.png)
 
 The LoadFramesFromFolder node allows loading image frames from a folder and returning them as a batch.
@@ -117,6 +117,11 @@ The LoadFramesFromFolder node allows loading image frames from a folder and retu
 #### Output
 - `IMAGES`: Batch of loaded frame images as PyTorch tensors.
 - `METADATA`: Metadata containing the set FPS value.
+- `MAX_WIDTH`: Maximum frame width.
+- `MAX_HEIGHT`: Maximum frame height.
+- `FRAME COUNT`: Number of frames in the folder.
+- `PATH`: Path to the folder containing the frame images.
+- `IMAGE LIST`: List of frame images in the folder (not a real list just a string divided by \n).
 
 The node loads all image files from the specified folder, converts them to PyTorch tensors, and returns them as a batched tensor along with simple metadata containing the set FPS value.
 

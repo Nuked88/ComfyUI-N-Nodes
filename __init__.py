@@ -1,23 +1,17 @@
-# code based on pysssss repo
 import importlib.util
-import glob
 import os
 import sys
-from .nnodes import init, get_ext_dir,check_and_install,downloader
+from .nnodes import init, get_ext_dir,check_and_install,downloader,get_commit,color
 import folder_paths
 import traceback
 from pathlib import Path
-import shutil
-
 NODE_CLASS_MAPPINGS = {}
 NODE_DISPLAY_NAME_MAPPINGS = {}
 
-  
 
 if init():
-    #py = get_ext_dir("py")
-    #files = glob.glob("*.py", root_dir=py, recursive=False)
-
+    print("------------------------------------------")
+    print(f"{color.BLUE}### N-Suite Revision:{color.END} {color.GREEN}{get_commit()} {color.END}")
     py = Path(get_ext_dir("py"))
     files = list(py.glob("*.py"))
     check_and_install('packaging')
@@ -30,7 +24,8 @@ if init():
     check_and_install('typing')
     check_and_install('diskcache')
     check_and_install('llama_cpp')
-    check_and_install('timm',"timm","0.9.12")
+    check_and_install('timm',"timm","0.9.12",reboot=True)
+    check_and_install('gitpython',"git")
     #check_and_install('sentencepiece')
     #check_and_install("accelerate")
     #check_and_install('transformers','transformers',"4.36.2")
@@ -59,7 +54,7 @@ if init():
     if not os.path.exists(os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle","train_log")):
         downloader("https://github.com/Nuked88/DreamingAI/raw/main/RIFE_trained_model_v4.7.zip")
                    
-
+    # code based on pysssss repo
     for file in files:
         try:
             name = os.path.splitext(file)[0]

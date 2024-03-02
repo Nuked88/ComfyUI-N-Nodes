@@ -654,9 +654,6 @@ class LoadFramesFromFolder:
     def INPUT_TYPES(s):
         return {"required": { "folder":("STRING",  {"default": ""} ),
                              "fps":("INT", {"default": 30})
-                            
-                             
-                             
                              }}
     
 

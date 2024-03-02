@@ -1092,7 +1092,7 @@ def prepare_image(image: Image.Image, target_size: int) -> torch.Tensor:
 
 @torch.no_grad()
 def predict(image: Image.Image, model, top_tags, THRESHOLD=0.4):
-	image = transforms.ToPILImage()(image[0].permute(2, 0, 1))
+	image = transforms.ToPILImage()(image.permute(2, 0, 1))
 	image_tensor = prepare_image(image, model.image_size)
 	batch = {
 		'image': image_tensor.unsqueeze(0).to('cuda'),

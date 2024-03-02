@@ -90,19 +90,20 @@ def load_joytag(ckpt_path,cpu=False):
     else:
         return model.to('cuda')
 
-def run_joytag(image, prompt, max_tags, model_funct):
+def run_joytag(images, prompt, max_tags, model_funct):
     with open(os.path.join(models_base_path,'joytag','top_tags.txt') , 'r') as f:
         top_tags = [line.strip() for line in f.readlines() if line.strip()]
         
-    if image is None:
+    if images is None:
         raise ValueError("No image provided")
+    top_tags_processed = []
+    for image in images:
+        _, scores = joytag_models.predict(image, model_funct, top_tags)
+        top_tags_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:max_tags]
+        # Extract the tags from the pairs
+        top_tags_processed.append(', '.join([tag for tag, _ in top_tags_scores]))
     
-    _, scores = joytag_models.predict(image, model_funct, top_tags)
-    top_tags_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:max_tags]
-    # Extract the tags from the pairs
-    top_tags_processed = [tag for tag, _ in top_tags_scores]
-    
-    return ', '.join(top_tags_processed)
+    return top_tags_processed
 
 
 def load_moondream(ckpt_path,cpu=False):
@@ -155,22 +156,24 @@ def load_moondream(ckpt_path,cpu=False):
     
 
 
-def run_moondream(image, prompt, max_tags, model_funct):
+def run_moondream(images, prompt, max_tags, model_funct):
     from PIL import Image
     moondream = model_funct[0]
     tokenizer = model_funct[1]
-    im=tensor2pil(image)
+    list_descriptions = []
+    for image in images:
+        im=tensor2pil(image)
 
-    image_embeds = moondream.encode_image(im)
-    try:
-        res=moondream.answer_question(image_embeds, prompt,tokenizer)
-    except ValueError:
-        print("\n\n\n")
-        raise ModuleNotFoundError("Please run install_extra.bat in custom_nodes/ComfyUI-N-Nodes folder to make sure to have the required verision of Transformers installed (4.36.2).")
+        image_embeds = moondream.encode_image(im)
+        try:
+            list_descriptions.append(moondream.answer_question(image_embeds, prompt,tokenizer))
+        except ValueError:
+            print("\n\n\n")
+            raise ModuleNotFoundError("Please run install_extra.bat in custom_nodes/ComfyUI-N-Nodes folder to make sure to have the required verision of Transformers installed (4.36.2).")
 
 
 
-    return res
+    return list_descriptions
 
 """
 def load_internlm(ckpt_path,cpu=False):
@@ -250,28 +253,31 @@ def run_internlm(image, prompt, max_tags, model_funct):
      
 
 
-def llava_inference(model_funct,prompt,image,max_tokens,stop_token,frequency_penalty,presence_penalty,repeat_penalty,temperature,top_k,top_p):
-        pil_image = tensor2pil(image[0])
-        # Convert the PIL image to a bytes buffer
-        buffer = BytesIO()
-        pil_image.save(buffer, format="JPEG")  # You can change the format if needed
-        image_bytes = buffer.getvalue()
-        base64_string = f"data:image/jpeg;base64,{base64.b64encode(image_bytes).decode('utf-8')}"
+def llava_inference(model_funct,prompt,images,max_tokens,stop_token,frequency_penalty,presence_penalty,repeat_penalty,temperature,top_k,top_p):
+        list_descriptions = []
+        for image in images:
+            pil_image = tensor2pil(image)
+            # Convert the PIL image to a bytes buffer
+            buffer = BytesIO()
+            pil_image.save(buffer, format="JPEG")  # You can change the format if needed
+            image_bytes = buffer.getvalue()
+            base64_string = f"data:image/jpeg;base64,{base64.b64encode(image_bytes).decode('utf-8')}"
 
-        response = model_funct.create_chat_completion( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,
-                                                      temperature=temperature,top_k=top_k,top_p=top_p,
-            messages = [
-                {"role": "system", "content": "You are an assistant who perfectly describes images."},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "image_url", "image_url": {"url": base64_string}},
-                        {"type" : "text", "text": prompt}
-                    ]
-                }
-            ]
-        )
-        return response['choices'][0]['message']['content']
+            response = model_funct.create_chat_completion( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,
+                                                        temperature=temperature,top_k=top_k,top_p=top_p,
+                messages = [
+                    {"role": "system", "content": "You are an assistant who perfectly describes images."},
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "image_url", "image_url": {"url": base64_string}},
+                            {"type" : "text", "text": prompt}
+                        ]
+                    }
+                ]
+            )
+            list_descriptions.append(response['choices'][0]['message']['content'])
+        return list_descriptions
 
 
 if not os.path.isdir(models_base_path):
@@ -445,6 +451,7 @@ class GPTSampler:
         }
 
     RETURN_TYPES = ("STRING",)
+    OUTPUT_IS_LIST = (True,)
     FUNCTION = "generate_text"
     CATEGORY = "N-Suite/Sampling"
 
@@ -470,7 +477,7 @@ class GPTSampler:
                     composed_prompt = f"{prefix} {prompt} {suffix}"
                     cont =""
                     stream = model_funct( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,temperature=temperature,top_k=top_k,top_p=top_p,model=model_path,prompt=composed_prompt)
-                    cont= stream["choices"][0]["text"]
+                    cont= [stream["choices"][0]["text"]]
                     self.temp_prompt  = cont
         else:
             cont = self.temp_prompt 

@@ -25,7 +25,7 @@ if init():
     check_and_install('diskcache')
     check_and_install('llama_cpp')
     check_and_install('timm',"timm","0.9.12",reboot=True)
-    check_and_install('gitpython',"git")
+    #check_and_install('gitpython',"git")
     #check_and_install('sentencepiece')
     #check_and_install("accelerate")
     #check_and_install('transformers','transformers',"4.36.2")

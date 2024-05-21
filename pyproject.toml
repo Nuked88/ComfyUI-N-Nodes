@@ -1,0 +1,15 @@
+[project]
+name = "comfyui-n-nodes"
+description = ""
+version = "1.0.0"
+license = "LICENSE"
+dependencies = ["py-cpuinfo", "gitpython", "moviepy", "opencv-python", "scikit-build", "typing", "diskcache"]
+
+[project.urls]
+Repository = "https://github.com/Nuked88/ComfyUI-N-Nodes"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-N-Nodes"
+Icon = ""

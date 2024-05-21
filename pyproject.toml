@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-n-nodes"
 description = "A suite of custom nodes for ConfyUI that includes GPT text-prompt generation, LoadVideo,SaveVideo,LoadFramesFromFolder and FrameInterpolator"
-version = "1.0.0"
+version = "1.0.1"
 license = "LICENSE"
 dependencies = ["py-cpuinfo", "gitpython", "moviepy", "opencv-python", "scikit-build", "typing", "diskcache"]
 
@@ -10,6 +10,6 @@ Repository = "https://github.com/Nuked88/ComfyUI-N-Nodes"
 #  Used by Comfy Registry https://comfyregistry.org
 
 [tool.comfy]
-PublisherId = ""
+PublisherId = "nuked"
 DisplayName = "ComfyUI-N-Nodes"
 Icon = ""

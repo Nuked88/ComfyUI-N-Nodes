@@ -74,6 +74,7 @@ The name has been changed from `LoadVideo` to `LoadVideoAdvanced` in order to av
 - `batch_size`: Batch size for encoding frames.
 - `starting_frame`: Select which frame to start from.
 - `autoplay`: Select whether to autoplay the video.
+- `use_ram`: Use RAM instead of disk for decompressing video frames.  
 
 #### Output
 

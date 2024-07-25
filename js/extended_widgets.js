@@ -123,6 +123,12 @@ function addVideo(node, name,src, app,autoplay_value) {
 			}
 			const visible = app.canvas.ds.scale > 0.5 && this.type === "customvideo";
 			const margin = 10;
+			let top_offset = 5
+			//hack for top menu
+			if (localStorage.getItem("Comfy.Settings.Comfy.UseNewMenu") === '"Top"') {
+				top_offset = 40;
+			}
+			
 			const elRect = ctx.canvas.getBoundingClientRect();
 			const transform = new DOMMatrix()
 				.scaleSelf(elRect.width / ctx.canvas.width, elRect.height / ctx.canvas.height)
@@ -134,7 +140,7 @@ function addVideo(node, name,src, app,autoplay_value) {
 				transformOrigin: "0 0",
 				transform: scale,
 				left: `${transform.a + transform.e}px`,
-				top: `${transform.d + transform.f}px`,
+				top: `${transform.d +top_offset+ transform.f}px`,
 				width: `${widgetWidth - (margin * 2)}px`,
 				height: `${this.parent.inputHeight - (margin * 2)}px`,
 				position: "absolute",
@@ -163,7 +169,7 @@ function addVideo(node, name,src, app,autoplay_value) {
 		type : "video/mp4"
 		
 	});
-	//widget.inputEl.classList.add("dididi");
+
 
 
 	

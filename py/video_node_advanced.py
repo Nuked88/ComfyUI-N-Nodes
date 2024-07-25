@@ -159,25 +159,33 @@ def calc_resize_image(input_path, target_size, resize_by):
     height, width = image.shape[:2]
 
     if resize_by == 'width':
-       
         new_width = target_size
         new_height = int(height * (target_size / width))
-       
     elif resize_by == 'height':
-       
         new_height = target_size
         new_width = int(width * (target_size / height))
-    
     else:
-
         new_height = height
         new_width = width
-    
-    return  new_width, new_height
-        
+
+    return new_width, new_height
+
+def calc_resize_image_from_ram(input_frame, target_size, resize_by):
+    height, width = input_frame.shape[:2]
+
+    if resize_by == 'width':
+        new_width = target_size
+        new_height = int(height * (target_size / width))
+    elif resize_by == 'height':
+        new_height = target_size
+        new_width = int(width * (target_size / height))
+    else:
+        new_height = height
+        new_width = width
+
+    return new_width, new_height
 
 def resize_image(input_path, new_width, new_height):
-
     image = cv2.imread(input_path)
     height, width = image.shape[:2]
 
@@ -185,18 +193,24 @@ def resize_image(input_path, new_width, new_height):
         resized_image = cv2.resize(image, (new_width, new_height))
     else:
         resized_image = image
- 
-        
+
     pil_image = Image.fromarray(cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB))
-
-
     return pil_image
 
+def resize_image_from_ram(image, new_width, new_height):
+    height, width = image.shape[:2]
 
+    if height != new_height or width != new_width:
+        resized_image = cv2.resize(image, (new_width, new_height))
+    else:
+        resized_image = image
 
-def extract_frames_from_video(video_path, output_folder, target_fps=30):
+    pil_image = Image.fromarray(cv2.cvtColor(resized_image, cv2.COLOR_BGR2RGB))
+    return pil_image
+
+def extract_frames_from_video(video_path, output_folder=None, target_fps=30, use_ram=True):
+    frames = []
     list_files = []
-    os.makedirs(output_folder, exist_ok=True)
     cap = cv2.VideoCapture(video_path)
     frame_count = 0
 
@@ -205,6 +219,13 @@ def extract_frames_from_video(video_path, output_folder, target_fps=30):
     # Calcola il rapporto per ridurre il framerate
     frame_skip_ratio = original_fps // target_fps
     real_frame_count = 0
+  
+    if not use_ram:
+        if output_folder is None:
+            raise ValueError("output_folder must be specified if use_ram is False")
+    if output_folder is not None:
+        os.makedirs(output_folder, exist_ok=True)
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -214,14 +235,22 @@ def extract_frames_from_video(video_path, output_folder, target_fps=30):
 
         # Estrai solo ogni "frame_skip_ratio"-esimo fotogramma
         if frame_count % frame_skip_ratio == 0:
-            frame_filename = os.path.join(output_folder, f"{frame_count:07d}.png")
-            list_files.append(frame_filename)
-            cv2.imwrite(frame_filename, frame)
+            if use_ram:
+                frames.append(frame)
+            else:
+                frame_filename = os.path.join(output_folder, f"{frame_count:07d}.png")
+                list_files.append(frame_filename)
+                cv2.imwrite(frame_filename, frame)
             real_frame_count += 1
 
     cap.release()
-    print(f"{real_frame_count} frames have been extracted from the video and saved in {output_folder}")
-    return list_files
+    print(f"{real_frame_count} frames have been extracted from the video")
+
+    if use_ram:
+        return frames
+    else:
+        return list_files
+
 
 
 def extract_frames_from_gif(gif_path, output_folder):
@@ -334,6 +363,8 @@ class LoadVideoAdvanced:
                               "batch_size": ("INT", {"default": 0, "min": 0, "step": 1}),
                               "starting_frame": ("INT", {"default": 0, "min": 0, "step": 1}), 
                               "autoplay":("BOOLEAN",{"default": True} ),
+                              "use_ram": ("BOOLEAN", {"default": False}),
+
                             },}
 
 
@@ -355,9 +386,8 @@ class LoadVideoAdvanced:
             pixels = pixels[:, x_offset:x + x_offset, y_offset:y + y_offset, :]
         return pixels
     
-    def load_video(self, video,framerate, local_url):
-        
-        file_path = folder_paths.get_annotated_filepath(os.path.join("n-suite",video))
+    def load_video(self, video, framerate, local_url, use_ram):
+        file_path = folder_paths.get_annotated_filepath(os.path.join("n-suite", video))
         cap = cv2.VideoCapture(file_path)
         # Check if the video was opened successfully
         if not cap.isOpened():
@@ -368,159 +398,120 @@ class LoadVideoAdvanced:
             print(f"The video has {fps} frames per second.")
 
         try:
-            shutil.rmtree(os.path.join(temp_output_dir,video.split(".")[0]))
+            shutil.rmtree(os.path.join(temp_output_dir, video.split(".")[0]))
         except:
             print("Video Path already deleted")
-    
 
-        full_temp_output_dir = os.path.join(temp_output_dir,video.split(".")[0])
-        #set new framerate
+        full_temp_output_dir = os.path.join(temp_output_dir, video.split(".")[0])
         
+        # Set new framerate
         if "half" in framerate:
             fps = fps // 2
-            print (f"The video has been reduced to {fps} frames per second.")
+            print(f"The video has been reduced to {fps} frames per second.")
         elif "quarter" in framerate:
             fps = fps // 4
-            print (f"The video has been reduced to {fps} frames per second.")
+            print(f"The video has been reduced to {fps} frames per second.")
 
-
-        # Estract frames
         file_extension = os.path.splitext(file_path)[1].lower()
 
-        if file_extension == ".mp4" or file_extension == ".webm":
-            list_files = extract_frames_from_video(file_path, full_temp_output_dir, target_fps=fps)
-
+        if file_extension in [".mp4", ".webm"]:
+            list_files = extract_frames_from_video(file_path, full_temp_output_dir, fps, use_ram)
+            
             audio_clip = VideoFileClip(file_path).audio
             try:
-                #save audio
-                audio_clip.write_audiofile(os.path.join(temp_output_dir,video.split(".")[0],"audio.mp3"))
+                # Save audio
+                audio_clip.write_audiofile(os.path.join(temp_output_dir, video.split(".")[0], "audio.mp3"))
             except:
                 print("Could not save audio")
                 pass      
         elif file_extension == ".gif":
-            extract_frames_from_gif(file_path, output_dir)
             list_files = extract_frames_from_gif(file_path, output_dir)
-            #create_gif_from_frames(output_dir, output_video2)
-            
         else:
             print("Format not supported. Please provide an MP4 or GIF file.")
 
-        
-        return list_files,fps
+        return list_files, fps
 
     def generate_latent(self, width, height, batch_size=1):
         latent = torch.zeros([batch_size, 4, height // 8, width // 8])
-        return {"samples":latent}
-    
-    def process_image(self,args):
-        image_path, width, height = args
+        return {"samples": latent}
+
+    def process_image(self, args):
+        image, width, height, use_ram = args
         # Funzione per ridimensionare e pre-elaborare un'immagine
-        image = resize_image(image_path, width, height)
+        if use_ram:
+            image = resize_image_from_ram(image, width, height)
+        else:
+            image = resize_image(image, width, height)
         image = image_preprocessing(image)
         return torch.tensor(image)
-    
-    def encode(self,video,framerate, local_url, resize_by, size, images_limit,batch_size,starting_frame,autoplay):
+
+    def encode(self, video, framerate, local_url, resize_by, size, images_limit, batch_size, starting_frame, autoplay, use_ram):
         metadata = []
-        FRAMES,fps = self.load_video(video,framerate, local_url)
+        FRAMES, fps = self.load_video(video, framerate, local_url, use_ram)
         max_frames = len(FRAMES)
 
-        
-      
-        if images_limit>0 and starting_frame>0:
-            images_limit = images_limit + starting_frame
-       
-        
-        #if images_limit==0:
-        #    images_limit = max_frames
-
+        if images_limit > 0 and starting_frame > 0:
+            images_limit += starting_frame
 
         print(f"images_limit {images_limit}")
 
+        if starting_frame > max_frames:
+            starting_frame = max_frames - 1
+            print(f"WARNING: The starting frame is greater than the number of frames in the video. Only the last frame of the video will be used ({starting_frame}).")
 
-
-        #if starting frame is too high do the last frames only  
-        if starting_frame>max_frames:
-            starting_frame = max_frames-1
-            print(f"{YELLOW}WARNING: The starting frame is greater than the number of frames in the video. Only the last frame of the video will be used ({starting_frame}). {END}")
-
-
-        #if images_limit > max_frames
         if images_limit > max_frames:
             images_limit = max_frames
-            print(f"{YELLOW}WARNING: The number of images to extract is greater than the number of frames in the video. Images_limit has been reduced to the number of frames ({images_limit}). {END}")
-            
+            print(f"WARNING: The number of images to extract is greater than the number of frames in the video. Images_limit has been reduced to the number of frames ({images_limit}).")
 
-        #if batch_size > max_frames
         if batch_size > max_frames:
-            print(f"{YELLOW}WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced. {END}")
+            print(f"WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced.")
             batch_size = max_frames
 
-       #if batch_size > images_limit
-        if images_limit!=0 and batch_size > images_limit:
-            print(f"{YELLOW}WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced to the number of images_limit. {END}")
+        if images_limit != 0 and batch_size > images_limit:
+            print(f"WARNING: The batch size is greater than the number of frames requested. Batch size has been reduced to the number of images_limit.")
             batch_size = images_limit
 
-
-
-        pool_size=5
-        t_list = []
-        i_list = [] 
-        i = 0
-        o = 0
-        final_count_frame=0
+        pool_size = 5
+        i_list = []
+        final_count_frame = 0
         
         with concurrent.futures.ThreadPoolExecutor() as executor:
             futures = []
-            width, height = calc_resize_image(FRAMES[0], size, resize_by)
-
+            if use_ram:
+                width, height = calc_resize_image_from_ram(FRAMES[0], size, resize_by)
+            else:
+                width, height = calc_resize_image(FRAMES[0], size, resize_by)
 
             for batch_start in range(0, len(FRAMES), pool_size):
                 batch_images = FRAMES[batch_start:batch_start + pool_size]
                 
-                #remove audio if image_limit > 0 or starting_frame>0
                 if images_limit != 0 or starting_frame != 0:
                     try:
-                        os.remove(os.path.join(temp_output_dir,video.split(".")[0],"audio.mp3"))
+                        os.remove(os.path.join(temp_output_dir, video.split(".")[0], "audio.mp3"))
                     except:
                         pass
-        
-                    #if o >= images_limit:
-                    #    break
 
-                for image_path in batch_images:
-                    # loop only when it reaches the starting_frame 
-                    
-                    if o>=starting_frame and (o<images_limit or images_limit==0):
-                        args = (image_path, width, height)
+                for idx, image in enumerate(batch_images):
+                    if final_count_frame >= starting_frame and (final_count_frame < images_limit or images_limit == 0):
+                        args = (image, width, height, use_ram)
                         futures.append(executor.submit(self.process_image, args))
                         final_count_frame += 1
-                        
-                    o += 1
-          
-                            
-                
-                i += len(batch_images)
 
-            # Attendi il completamento delle operazioni in parallelo
             concurrent.futures.wait(futures)
 
-            # Recupera i risultati
             for future in futures:
                 batch_i_tensors = future.result()
                 i_list.extend(batch_i_tensors)
 
         i_tensor = torch.stack(i_list, dim=0)
-       
 
         if images_limit != 0 or starting_frame != 0:
-            
-            b_size=final_count_frame
+            b_size = final_count_frame
         else:
-            b_size=len(FRAMES)
+            b_size = len(FRAMES)
 
+        latent = self.generate_latent(width, height, batch_size=b_size)
 
-        latent = self.generate_latent( width, height, batch_size=b_size)
-        
         metadata.append(fps)
         metadata.append(b_size)
         try:
@@ -531,12 +522,11 @@ class LoadVideoAdvanced:
         if batch_size != 0:
             rebatcher = LatentRebatch()
             rebatched_latent = rebatcher.rebatch([latent], [batch_size])
-            n_chunks = b_size//batch_size
+            n_chunks = b_size // batch_size
             i_tensor_batches = torch.chunk(i_tensor, n_chunks, dim=0)
-           
-            return (i_tensor_batches,rebatched_latent,metadata, width, height,)
-        
-        return ( [i_tensor],[latent],metadata, width, height,fps,b_size,) 
+            return i_tensor_batches, rebatched_latent, metadata, width, height
+
+        return [i_tensor], [latent], metadata, width, height, fps, b_size
     
     
 class SaveVideo:

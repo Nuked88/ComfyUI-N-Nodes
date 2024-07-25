@@ -81,8 +81,8 @@ def load_joytag(ckpt_path,cpu=False):
     jt_model= os.path.join(models_base_path,"joytag","model.safetensors")
 
 
-    #if os.path.exists(jt_config)==False or os.path.exists(jt_readme)==False or os.path.exists(jt_top_tags)==False or os.path.exists(jt_model)==False:
-    snapshot_download("fancyfeast/joytag",local_dir = os.path.join(models_base_path,"joytag"),local_dir_use_symlinks = False,)
+    if os.path.exists(jt_config)==False or os.path.exists(jt_readme)==False or os.path.exists(jt_top_tags)==False or os.path.exists(jt_model)==False:
+        snapshot_download("fancyfeast/joytag",local_dir = os.path.join(models_base_path,"joytag"),local_dir_use_symlinks = False,)
     model = joytag_models.VisionModel.load_model(ckpt_path)
     model.eval()
     if cpu:
@@ -371,6 +371,7 @@ class GPTLoaderSimple:
     RETURN_TYPES = ("CUSTOM", )
     RETURN_NAMES = ("model",)
     FUNCTION = "load_gpt_checkpoint"
+    DESCRIPTION = "Loads a GPT checkpoint (GGUF format)<img src='https://compote.slate.com/images/697b023b-64a5-49a0-8059-27b963453fb1.gif?crop=780%2C520%2Cx0%2Cy0&width=1280' />"
 
     CATEGORY = "N-Suite/loaders"
  

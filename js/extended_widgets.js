@@ -181,20 +181,24 @@ function addVideo(node, name,src, app,autoplay_value) {
 		// Draw node isnt fired once the node is off the screen
 		// if it goes off screen quickly, the input may not be removed
 		// this shifts it off screen so it can be moved back if the node is visible.
-		for (let n of app.graph._nodes) {
+		for (let n in app.graph._nodes) {
+			n = graph._nodes[n];
 			for (let w in n.widgets) {
-				let widget = this.widgets[w];
-				widget.inputEl?.style.left = -8000 + "px";
-				widget.inputEl?.style.position = "absolute";
+				let wid = n.widgets[w];
+				if (Object.hasOwn(wid, "inputEl")) {
+					wid.inputEl.style.left = -8000 + "px";
+					wid.inputEl.style.position = "absolute";
+				}
 			}
 		}
 	};
 
 	node.onRemoved = function () {
 		// When removing this node we need to remove the input from the DOM
-		for (let w in this.widgets) {
-			let widget = this.widgets[w];
-			widget.inputEl?.remove();
+		for (let y in this.widgets) {
+			if (this.widgets[y].inputEl) {
+				this.widgets[y].inputEl.remove();
+			}
 		}
 	};
 

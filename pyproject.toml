@@ -2,7 +2,7 @@
 name = "comfyui-n-nodes"
 description = "A suite of custom nodes for ConfyUI that includes GPT text-prompt generation, LoadVideo,SaveVideo,LoadFramesFromFolder and FrameInterpolator"
 version = "1.1.0"
-license = "LICENSE"
+license = { file = "LICENSE" }
 dependencies = ["py-cpuinfo", "gitpython", "moviepy", "opencv-python", "scikit-build", "typing", "diskcache"]
 
 [project.urls]

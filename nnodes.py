@@ -10,6 +10,7 @@ import requests
 import subprocess
 import platform
 import importlib.util
+from importlib.metadata import version as metadata_version
 import torch
 import folder_paths
 import sys
@@ -138,15 +139,30 @@ def get_last_llcpppy_version():
 
 from packaging import version
 
+def get_version(module_name):
+    try:
+        if not metadata_version(module_name) == None:
+            return metadata_version(module_name)
+        module = importlib.import_module(module_name)
+        if hasattr(module, '__version__'):
+            return module.__version__
+        if hasattr(module, 'version'):
+            return module.version
+        return None
+    except ImportError:
+        return None
+
 def check_and_install(package, import_name="", desired_version=None,reboot=False):
     if import_name == "":
         import_name = package
     try:
-        library_module = importlib.import_module(import_name)
-        current_version  = getattr(library_module, '__version__', None)
+        current_version = get_version(import_name)
+        if not current_version:
+            current_version = get_version(package)
+        if not current_version and import_name == 'llama_cpp':
+            current_version = get_version('llama-cpp-python')
         if current_version :
-            if current_version:
-                print(f"Current version of {import_name}: {current_version}")
+            print(f"Current version of {import_name}: {current_version}")
             if desired_version:
                 if version.parse(current_version) < version.parse(desired_version):
                     print(f"Updating {import_name} to version {desired_version}...")
@@ -157,8 +173,8 @@ def check_and_install(package, import_name="", desired_version=None,reboot=False
 
         else:
             print(f"Version of {import_name}: Not found")
+            raise ImportError(f"The module '{import_name}' could not be imported.")
 
-        
     except ImportError:
         print(f"Installing {import_name}...")
         if package == "llama_cpp":
@@ -189,7 +205,6 @@ def install_llama():
         if python_version == None:
             print("Unsupported Python version. Please use Python 3.9, 3.10 or 3.11.")
             return
-        
 
         #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117
         if avx2:

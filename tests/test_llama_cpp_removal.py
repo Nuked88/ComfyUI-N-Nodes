@@ -26,8 +26,9 @@ def test_readme_announces_breaking_change_and_model_downloads():
     readme = (ROOT / "README.md").read_text()
     assert "Breaking change in 1.2.0" in readme
     assert "was never downloaded automatically" in readme
-    assert "first time Moondream is loaded" in readme
-    assert "first time JoyTag is loaded" in readme
+    assert "Downloads happen on first model use" in readme
+    assert "3.72 GB" in readme
+    assert "0.37 GB" in readme
     assert "git checkout ae7cc84" in readme
 
 

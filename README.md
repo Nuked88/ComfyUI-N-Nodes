@@ -159,11 +159,12 @@ The node-variables are:
 
 The legacy node identifiers are retained so existing Moondream and JoyTag workflows continue to load, but these nodes are now limited to image captioning:
 
-- **Moondream:** the model, tokenizer, and required code files are downloaded automatically from a pinned revision of `vikhyatk/moondream1` on Hugging Face the first time Moondream is loaded.
-- **JoyTag:** its model snapshot is downloaded automatically from the `fancyfeast/joytag` Hugging Face repository the first time JoyTag is loaded.
+- **Moondream:** only the required code, tokenizer, and single `model.safetensors` file are downloaded from a pinned revision of `vikhyatk/moondream1` on Hugging Face. The model file is about **3.72 GB**; the repository also contains larger alternative weights that are not downloaded.
+- **JoyTag:** only the required configuration, tags, and `model.safetensors` are downloaded from a pinned revision of `fancyfeast/joytag`. The model file is about **0.37 GB**; the unused ONNX file is not downloaded.
 - **LLaVA:** was never downloaded automatically. Its GGUF model and projector had to be installed manually; support has now been removed together with `llama-cpp-python`.
 
 Downloads happen on first model use, not merely when ComfyUI starts. An internet connection and sufficient disk space are required for that initial load. Models are stored under `ComfyUI/models/GPTcheckpoints/moondream` and `ComfyUI/models/GPTcheckpoints/joytag`.
+GPT Loader Simple displays a download notice when the selected model file is missing. The ComfyUI console shows the download progress.
 
 ### GPTLoaderSimple
 

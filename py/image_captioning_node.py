@@ -8,11 +8,17 @@ sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs"))
 import joytag_models
 from PIL import Image
 from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer
+from server import PromptServer
 #,AutoTokenizer, AutoModelForCausalLM
 import numpy as np
 
 models_base_path = os.path.join(folder_paths.models_dir, "GPTcheckpoints")
 MOONDREAM_REVISION = "f6e9da68e8f1b78b8f3ee10905d56826db7a5802"
+JOYTAG_REVISION = "6b7f16331a6ccf0fdce37d5a9564715f6e772b22"
+MODEL_DOWNLOADS = {
+    "moondream": ("Moondream", 3.72),
+    "joytag": ("JoyTag", 0.37),
+}
 _choice = ["YES", "NO"]
 _folders_whitelist = ["moondream","joytag"]#,"internlm"]
 
@@ -73,7 +79,12 @@ def load_joytag(ckpt_path,cpu=False):
 
 
     if os.path.exists(jt_config)==False or os.path.exists(jt_readme)==False or os.path.exists(jt_top_tags)==False or os.path.exists(jt_model)==False:
-        snapshot_download("fancyfeast/joytag",local_dir = os.path.join(models_base_path,"joytag"),local_dir_use_symlinks = False,)
+        snapshot_download(
+            "fancyfeast/joytag",
+            revision=JOYTAG_REVISION,
+            local_dir=os.path.join(models_base_path, "joytag"),
+            allow_patterns=["README.md", "config.json", "model.safetensors", "top_tags.txt"],
+        )
     model = joytag_models.VisionModel.load_model(ckpt_path)
     model.eval()
     if cpu:
@@ -264,21 +275,33 @@ class GPTLoaderSimple:
               "gpu_layers": ("INT", {"default": 27, "min": 0, "max": 100, "step": 1}),
               "n_threads": ("INT", {"default": 8, "min": 1, "max": 100, "step": 1}),
               "max_ctx": ("INT", {"default": 2048, "min": 300, "max": 100000, "step": 64}),
-                             }}
+                             },
+                "hidden": {"unique_id": "UNIQUE_ID"}}
     
 
 
     RETURN_TYPES = ("CUSTOM", )
     RETURN_NAMES = ("model",)
     FUNCTION = "load_gpt_checkpoint"
-    DESCRIPTION = "Loads a Moondream or JoyTag image-captioning model. GGUF and LLaVA support was removed in version 1.2.0."
+    DESCRIPTION = "Loads Moondream (~3.72 GB) or JoyTag (~0.37 GB). The first use downloads the selected model; watch the ComfyUI console for progress."
 
     CATEGORY = "N-Suite/loaders"
  
-    def load_gpt_checkpoint(self, ckpt_name, gpu_layers, n_threads, max_ctx):
+    def load_gpt_checkpoint(self, ckpt_name, gpu_layers, n_threads, max_ctx, unique_id=None):
         ckpt_path = get_model_path(all_models,ckpt_name)
         if ckpt_name not in MODEL_LOAD_FUNCTIONS:
             raise ValueError(f"Unsupported model: {ckpt_name}")
+        model_dir = os.path.join(models_base_path, ckpt_name)
+        if not os.path.isfile(os.path.join(model_dir, "model.safetensors")):
+            model_name, size_gb = MODEL_DOWNLOADS[ckpt_name]
+            message = (f"{model_name}: downloading approximately {size_gb:.2f} GB on first use. "
+                       "This may take a while; watch the ComfyUI console for progress.")
+            print(f"[N-Suite] {message}", flush=True)
+            if PromptServer.instance is not None:
+                PromptServer.instance.send_sync(
+                    "n-suite-model-download",
+                    {"node_id": unique_id, "model": model_name, "size_gb": size_gb, "message": message},
+                )
         cpu = gpu_layers == 0
         llm = MODEL_LOAD_FUNCTIONS[ckpt_name](ckpt_path, cpu)
 

@@ -7,7 +7,8 @@ from huggingface_hub import snapshot_download
 sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs"))
 import joytag_models
 from PIL import Image
-from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer, GenerationConfig, GenerationMixin
+from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer, GenerationConfig, GenerationMixin, PreTrainedModel
+from transformers.dynamic_module_utils import HF_MODULES_CACHE
 from server import PromptServer
 #,AutoTokenizer, AutoModelForCausalLM
 import numpy as np
@@ -130,6 +131,7 @@ def load_moondream(ckpt_path,cpu=False):
             "special_tokens_map.json", "added_tokens.json", "merges.txt", "vocab.json",
         ],
     )
+    patch_moondream_model_code(model_dir)
     tokenizer = Tokenizer.from_pretrained(model_dir)
     moondream = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True)
     enable_moondream_generation(moondream)
@@ -141,27 +143,72 @@ def load_moondream(ckpt_path,cpu=False):
 def enable_moondream_generation(moondream):
     """Restore generation for Moondream1's legacy Phi model on Transformers 4.50+."""
     text_model = moondream.text_model
-    if isinstance(text_model, GenerationMixin):
+    if getattr(text_model, "_n_suite_generation_compat", False):
         return
 
-    class GeneratingPhiForCausalLM(type(text_model), GenerationMixin):
-        def prepare_inputs_for_generation(
-            self, input_ids=None, inputs_embeds=None, past_key_values=None,
-            attention_mask=None, **kwargs,
-        ):
-            prepared = super().prepare_inputs_for_generation(
-                input_ids=input_ids, inputs_embeds=inputs_embeds,
-                past_key_values=past_key_values, attention_mask=attention_mask,
-                **kwargs,
-            )
-            # Moondream supplies image embeddings without padding. The newer
-            # generation API otherwise builds a mask one token too long.
-            prepared["attention_mask"] = None
-            return prepared
+    model_class = type(text_model)
+    original_prepare = model_class.prepare_inputs_for_generation
 
-    text_model.__class__ = GeneratingPhiForCausalLM
+    def prepare_inputs_for_generation(
+        self, input_ids=None, inputs_embeds=None, past_key_values=None,
+        attention_mask=None, **kwargs,
+    ):
+        prepared = original_prepare(
+            self, input_ids=input_ids, inputs_embeds=inputs_embeds,
+            past_key_values=past_key_values, attention_mask=attention_mask,
+            **kwargs,
+        )
+        # Moondream supplies image embeddings without padding. The newer
+        # generation API otherwise builds a mask one token too long.
+        prepared["attention_mask"] = None
+        return prepared
+
+    bases = (model_class,) if isinstance(text_model, GenerationMixin) else (model_class, GenerationMixin)
+    text_model.__class__ = type(
+        "GeneratingPhiForCausalLM", bases,
+        {"prepare_inputs_for_generation": prepare_inputs_for_generation},
+    )
+    text_model._n_suite_generation_compat = True
     if text_model.generation_config is None:
         text_model.generation_config = GenerationConfig.from_model_config(text_model.config)
+
+
+def patch_moondream_model_code(model_dir):
+    """Add GenerationMixin to the pinned Phi source before Transformers imports it."""
+    original_import = "from transformers import PretrainedConfig, PreTrainedModel"
+    parent_base = "class PhiPreTrainedModel(PreTrainedModel):"
+    previous_patch = "class PhiPreTrainedModel(PreTrainedModel, GenerationMixin):"
+    model_bases = (
+        ("class PhiModel(PhiPreTrainedModel):", "class PhiModel(PhiPreTrainedModel, GenerationMixin):"),
+        ("class PhiForCausalLM(PhiPreTrainedModel):", "class PhiForCausalLM(PhiPreTrainedModel, GenerationMixin):"),
+    )
+    needs_patch = not issubclass(PreTrainedModel, GenerationMixin)
+
+    def patch_source(path):
+        source = path.read_text()
+        if original_import not in source:
+            raise RuntimeError("Unexpected Moondream1 Phi source; cannot apply the generation compatibility patch")
+        if previous_patch in source:
+            source = source.replace(previous_patch, parent_base, 1)
+        for original, patched in model_bases:
+            if original not in source and patched not in source:
+                raise RuntimeError("Unexpected Moondream1 Phi source; cannot apply the generation compatibility patch")
+            if needs_patch:
+                source = source.replace(original, patched, 1)
+            else:
+                source = source.replace(patched, original, 1)
+        patched_import = original_import + ", GenerationMixin"
+        if needs_patch:
+            source = source.replace(original_import, patched_import, 1) if patched_import not in source else source
+        else:
+            source = source.replace(patched_import, original_import, 1)
+        if source != path.read_text():
+            path.write_text(source)
+
+    patch_source(Path(model_dir) / "modeling_phi.py")
+    cached_source = Path(HF_MODULES_CACHE) / "transformers_modules" / Path(model_dir).name / "modeling_phi.py"
+    if cached_source.is_file():
+        patch_source(cached_source)
     
 
 

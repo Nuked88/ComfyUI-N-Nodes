@@ -9,14 +9,14 @@ import cv2
 import os
 import imageio
 import shutil
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy import VideoFileClip, AudioFileClip
+from contextlib import ExitStack
 import random
 import math
 import json
 from comfy.cli_args import args
 import time
 import concurrent.futures
-import skbuild
 
 
 
@@ -417,13 +417,12 @@ class LoadVideoAdvanced:
         if file_extension in [".mp4", ".webm"]:
             list_files = extract_frames_from_video(file_path, full_temp_output_dir, fps, use_ram)
             
-            audio_clip = VideoFileClip(file_path).audio
             try:
-                # Save audio
-                audio_clip.write_audiofile(os.path.join(temp_output_dir, video.split(".")[0], "audio.mp3"))
-            except:
-                print("Could not save audio")
-                pass      
+                with VideoFileClip(file_path) as video_clip:
+                    if video_clip.audio is not None:
+                        video_clip.audio.write_audiofile(os.path.join(temp_output_dir, video.split(".")[0], "audio.mp3"))
+            except Exception as exc:
+                print(f"Could not save audio: {exc}")
         elif file_extension == ".gif":
             list_files = extract_frames_from_gif(file_path, output_dir)
         else:
@@ -603,32 +602,28 @@ class SaveVideo:
         if(file_name_number >= frame_number):
             create_video_from_frames(frames_output_dir, videos_output_temp_dir,frame_rate=fps)
         
-            video_clip = VideoFileClip(videos_output_temp_dir)
-            try:
-                audio_clip =  AudioFileClip(os.path.join(temp_output_dir,video_filename_original,"audio.mp3"))
-                video_clip = video_clip.set_audio(audio_clip)
-            except:
-                print("No audio found")
-                pass
-            
-            if SaveFrames == True:
-                #copy frames_output_dir to self.video_file_path/self.video_filename
-                frame_folder=os.path.join(videos_output_dir,self.video_filename.split(".")[0])
-                
-                shutil.copytree(frames_output_dir, frame_folder)
+            with ExitStack() as clips:
+                video_clip = clips.enter_context(VideoFileClip(videos_output_temp_dir))
+                audio_path = os.path.join(temp_output_dir, video_filename_original, "audio.mp3")
+                if os.path.isfile(audio_path):
+                    audio_clip = clips.enter_context(AudioFileClip(audio_path))
+                    video_clip = video_clip.with_audio(audio_clip)
 
-            if SaveVideo == True:
-                video_clip.write_videofile(self.video_file_path)
-                file_name = self.video_filename
-            else:
-                #delete all temporary files that start with video_preview
-                for file in os.listdir(video_preview_output_temp_dir):
-                    if file.startswith("video_preview"):
-                        os.remove(os.path.join(video_preview_output_temp_dir,file))
-                #random number
-                suffix = str(random.randint(1,100000))
-                file_name = f"video_preview_{suffix}.mp4"
-                video_clip.write_videofile(os.path.join(video_preview_output_temp_dir,file_name))
+                if SaveFrames == True:
+                    #copy frames_output_dir to self.video_file_path/self.video_filename
+                    frame_folder=os.path.join(videos_output_dir,self.video_filename.split(".")[0])
+                    shutil.copytree(frames_output_dir, frame_folder)
+
+                if SaveVideo == True:
+                    video_clip.write_videofile(self.video_file_path)
+                    file_name = self.video_filename
+                else:
+                    for file in os.listdir(video_preview_output_temp_dir):
+                        if file.startswith("video_preview"):
+                            os.remove(os.path.join(video_preview_output_temp_dir,file))
+                    suffix = str(random.randint(1,100000))
+                    file_name = f"video_preview_{suffix}.mp4"
+                    video_clip.write_videofile(os.path.join(video_preview_output_temp_dir,file_name))
                 
           
 

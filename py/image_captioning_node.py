@@ -3,21 +3,16 @@ import os
 from pathlib import Path
 import sys
 import torch
-from huggingface_hub import snapshot_download, hf_hub_download
+from huggingface_hub import snapshot_download
 sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs"))
 import joytag_models
-try:
-    from moondream_repo.moondream.moondream import Moondream
-    moondream_loaded = True
-except Exception as e:
-    moondream_loaded = False
-    print(f"Moondream error: reinstall N-Suite dependencies with ComfyUI Manager or requirements.txt.\nTorch must be >= 2.1.0 (ERROR: {e})")
 from PIL import Image
-from transformers import CodeGenTokenizerFast as Tokenizer
+from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer
 #,AutoTokenizer, AutoModelForCausalLM
 import numpy as np
 
 models_base_path = os.path.join(folder_paths.models_dir, "GPTcheckpoints")
+MOONDREAM_REVISION = "f6e9da68e8f1b78b8f3ee10905d56826db7a5802"
 _choice = ["YES", "NO"]
 _folders_whitelist = ["moondream","joytag"]#,"internlm"]
 
@@ -112,43 +107,22 @@ def load_moondream(ckpt_path,cpu=False):
         device = torch.device("cuda")
  
 
-    config_json=os.path.join(os.path.join(models_base_path,"moondream"),'config.json')
-    if os.path.exists(config_json)==False:
-        hf_hub_download("vikhyatk/moondream1",
-                                    local_dir=os.path.join(models_base_path,"moondream"),
-                                    local_dir_use_symlinks=True,
-                                    filename="config.json",
-                                    endpoint='https://hf-mirror.com')
-    
-    model_safetensors=os.path.join(models_base_path,"moondream",'model.safetensors')
-    if os.path.exists(model_safetensors)==False:
-        hf_hub_download("vikhyatk/moondream1",
-                                   local_dir=os.path.join(models_base_path,"moondream"),
-                                   local_dir_use_symlinks=True,
-                                   filename="model.safetensors",
-                                   endpoint='https://hf-mirror.com')
-    
-    tokenizer_json=os.path.join(models_base_path,"moondream",'tokenizer.json')
-    if os.path.exists(tokenizer_json)==False:
-        hf_hub_download("vikhyatk/moondream1",
-                                   local_dir=os.path.join(models_base_path,"moondream"),
-                                   local_dir_use_symlinks=True,
-                                   filename="tokenizer.json",
-                                   endpoint='https://hf-mirror.com')
-    
-    if moondream_loaded:
-        tokenizer = Tokenizer.from_pretrained(os.path.join(models_base_path,"moondream"))
-        moondream = Moondream.from_pretrained(os.path.join(models_base_path,"moondream")).to(device=device, dtype=dtype)
-        moondream.eval()
-    else:
-        tokenizer=None
-        moondream=None
-
-
-
-
-
-    return ([moondream, tokenizer])
+    model_dir = os.path.join(models_base_path, "moondream")
+    snapshot_download(
+        "vikhyatk/moondream1",
+        revision=MOONDREAM_REVISION,
+        local_dir=model_dir,
+        allow_patterns=[
+            "config.json", "configuration_moondream.py", "moondream.py",
+            "modeling_phi.py", "text_model.py", "vision_encoder.py",
+            "model.safetensors", "tokenizer.json", "tokenizer_config.json",
+            "special_tokens_map.json", "added_tokens.json", "merges.txt", "vocab.json",
+        ],
+    )
+    tokenizer = Tokenizer.from_pretrained(model_dir)
+    moondream = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(device=device, dtype=dtype)
+    moondream.eval()
+    return [moondream, tokenizer]
     
 
 
@@ -249,15 +223,12 @@ def run_internlm(image, prompt, max_tags, model_funct):
      
 
 
-if not os.path.isdir(models_base_path):
-        os.mkdir(models_base_path)
+os.makedirs(models_base_path, exist_ok=True)
 
 #create folder if it doesn't exist
-if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","joytag")):
-        os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","joytag"))
+os.makedirs(os.path.join(models_base_path, "joytag"), exist_ok=True)
 
-if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","moondream")):
-        os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","moondream"))
+os.makedirs(os.path.join(models_base_path, "moondream"), exist_ok=True)
 
 """#internlm
 if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","internlm")):

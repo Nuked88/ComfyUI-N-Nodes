@@ -29,17 +29,18 @@ def test_readme_announces_breaking_change_and_model_downloads():
     assert "first time Moondream is loaded" in readme
     assert "first time JoyTag is loaded" in readme
     assert "git checkout ae7cc84" in readme
-    assert "old LLaVA implementation was not independent" in readme
 
 
-def test_dependencies_are_manager_installable_and_moviepy_is_compatible():
+def test_dependencies_allow_current_comfyui_versions():
     requirements = (ROOT / "requirements.txt").read_text().splitlines()
     pyproject = (ROOT / "pyproject.toml").read_text()
-    assert "moviepy<2" in requirements
-    assert '"moviepy<2"' in pyproject
+    assert "moviepy>=2.2.1,<3" in requirements
+    assert '"moviepy>=2.2.1,<3"' in pyproject
     assert "huggingface-hub" in requirements
-    assert "transformers==4.36.2" in requirements
-    assert "timm==0.9.12" in requirements
+    assert "transformers>=4.36.2,<5" in requirements
+    assert "timm>=1.0.22" in requirements
+    assert "accelerate>=1.0,<2" in requirements
+    assert "scikit-build" not in requirements
 
 
 def test_extension_does_not_install_packages_during_import():
@@ -66,7 +67,8 @@ def test_dynamic_widgets_use_current_removal_api_and_node_id():
 def test_external_repositories_and_model_archive_are_pinned():
     bootstrap = (ROOT / "__init__.py").read_text()
     assert 'RIFE_REVISION = "a8a8035323b1c1a4a20753c751780e5b0a879455"' in bootstrap
-    assert 'MOONDREAM_REVISION = "38af98596e59f2a6c25c6b52b2bd5a672dab4144"' in bootstrap
+    captioning = (ROOT / "py" / "image_captioning_node.py").read_text()
+    assert 'MOONDREAM_REVISION = "f6e9da68e8f1b78b8f3ee10905d56826db7a5802"' in captioning
     assert 'RIFE_MODEL_REVISION = "572480112b87f9bfbff7579b8a38b483766e455f"' in bootstrap
     assert "/raw/main/RIFE_trained_model" not in bootstrap
     assert "repo.git.checkout(revision)" in bootstrap
@@ -78,5 +80,3 @@ def test_registry_publish_is_manual_after_nightly_validation():
     assert "push:" not in workflow
 
     readme = (ROOT / "README.md").read_text()
-    assert "Testing this release through Manager Nightly" in readme
-    assert "a pull request cannot be selected as nightly while it is still unmerged" in readme

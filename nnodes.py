@@ -61,7 +61,7 @@ class color:
 def get_commit():
     try:
         import git
-        repo = git.Repo( os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes"))
+        repo = git.Repo(get_ext_dir())
         return repo.head.object.hexsha[:8]
     except:
         return 0
@@ -83,7 +83,7 @@ def downloader(link):
                 f.write(chunk) 
 
     zip_file = zipfile.ZipFile(temp_file) 
-    target_dir = os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],"ComfyUI-N-Nodes","libs","rifle") # Cartella dove estrarre lo zip
+    target_dir = get_ext_dir(os.path.join("libs", "rifle"))
 
     zip_file.extractall(target_dir) 
 

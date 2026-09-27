@@ -10,8 +10,6 @@ WEB_DIRECTORY = "./js"
 
 RIFE_REPOSITORY = "https://github.com/hzwer/Practical-RIFE.git"
 RIFE_REVISION = "a8a8035323b1c1a4a20753c751780e5b0a879455"
-MOONDREAM_REPOSITORY = "https://github.com/Nuked88/moondream.git"
-MOONDREAM_REVISION = "38af98596e59f2a6c25c6b52b2bd5a672dab4144"
 RIFE_MODEL_REVISION = "572480112b87f9bfbff7579b8a38b483766e455f"
 
 
@@ -42,11 +40,6 @@ if __package__:
 
         rife_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "libs", "rifle")
         clone_at_revision(Repo, RIFE_REPOSITORY, rife_path, RIFE_REVISION)
-
-        moondream_path = os.path.join(
-            os.path.dirname(os.path.realpath(__file__)), "libs", "moondream_repo"
-        )
-        clone_at_revision(Repo, MOONDREAM_REPOSITORY, moondream_path, MOONDREAM_REVISION)
 
         if not os.path.exists(os.path.join(rife_path, "train_log")):
             downloader(

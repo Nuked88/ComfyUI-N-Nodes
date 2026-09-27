@@ -13,7 +13,8 @@ from queue import Queue, Empty
 from pathlib import Path
 
 
-sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs","rifle"))
+rife_dir = Path(__file__).resolve().parent.parent / "libs" / "rifle"
+sys.path.append(str(rife_dir))
 
 from model.pytorch_msssim import ssim_matlab
 interpolation_temp_input_folder = os.path.join(folder_paths.get_temp_directory(),"n-suite","interpolation_input")
@@ -48,7 +49,7 @@ model = Model()
 if not hasattr(model, 'version'):
     model.version = 0
 
-model_folder= os.path.join(folder_paths.folder_names_and_paths["custom_nodes"][0][0],'ComfyUI-N-Nodes','libs','rifle','train_log')
+model_folder = str(rife_dir / "train_log")
 
 
 
@@ -318,7 +319,6 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "FrameInterpolator [n-suite]": "FrameInterpolator [🅝-🅢🅤🅘🅣🅔]"
 }
-
 
 
 

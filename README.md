@@ -3,19 +3,14 @@
 # ComfyUI-N-Suite
 A suite of custom nodes for ComfyUI that includes integer, string and float variable nodes, image-captioning nodes and video nodes.
 
-> [!IMPORTANT]  
-> These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
-**Any other environment has not been tested.**
+The nodes support ComfyUI's Python environment on Windows and Linux. The current dependencies include MoviePy 2, timm 1.0.22 or newer, accelerate 1.x, and transformers 4.36.2 through 4.x.
 
 
 # Installation
 
-1. Clone the repository:
-`git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
-to your ComfyUI `custom_nodes` directory
-
-2. Install it through **ComfyUI Manager** (recommended), which installs the dependencies declared by the project, or run `python -m pip install -r requirements.txt` in ComfyUI's Python environment after a manual clone.
-3. Restart ComfyUI.
+1. Install **ComfyUI-N-Nodes** through ComfyUI Manager (recommended). For a manual install, clone `https://github.com/Nuked88/ComfyUI-N-Nodes.git` into ComfyUI's `custom_nodes` directory and run `python -m pip install -r requirements.txt` using the same Python environment that runs ComfyUI.
+2. Ensure `ComfyUI/models/GPTcheckpoints` is writable by the ComfyUI process so Moondream and JoyTag can download their models.
+3. Restart ComfyUI. The extension clones pinned RIFE code and downloads its pinned model at startup on a fresh install; an internet connection is needed for that first startup.
 
 ComfyUI automatically loads all custom scripts and nodes at startup.
 
@@ -34,19 +29,14 @@ ComfyUI automatically loads all custom scripts and nodes at startup.
 > For install the last version of this repository before this changes from the Comfyui-N-Suite execute **git checkout 29b2e43baba81ee556b2930b0ca0a9c978c47083**
 
 
-- For uninstallation:
-  - Delete the `ComfyUI-N-Nodes` folder in `custom_nodes`
-  - Delete the `comfyui-n-nodes` folder in  `ComfyUI\web\extensions`
-  - Delete the `n-styles.csv` and `n-styles.csv.backup` file in `ComfyUI\styles`
-  - Delete the `GPTcheckpoints` folder in `ComfyUI\models`
+For uninstallation, remove the extension through ComfyUI Manager or delete its folder from `custom_nodes`, then restart ComfyUI. Model files in `models/GPTcheckpoints` are user data and can be kept for a later reinstall.
 
 
 
 
 
 # Update
-1. Navigate to the cloned repo e.g. `custom_nodes/ComfyUI-N-Nodes`
-2. `git pull`
+Update through ComfyUI Manager. For a manual install, run `git pull` in the cloned extension directory, install `requirements.txt` again in ComfyUI's Python environment, and restart ComfyUI.
 
 # Features
 
@@ -169,7 +159,7 @@ The node-variables are:
 
 The legacy node identifiers are retained so existing Moondream and JoyTag workflows continue to load, but these nodes are now limited to image captioning:
 
-- **Moondream:** its `config.json`, `model.safetensors`, and `tokenizer.json` files are downloaded automatically from the `vikhyatk/moondream1` Hugging Face repository the first time Moondream is loaded.
+- **Moondream:** the model, tokenizer, and required code files are downloaded automatically from a pinned revision of `vikhyatk/moondream1` on Hugging Face the first time Moondream is loaded.
 - **JoyTag:** its model snapshot is downloaded automatically from the `fancyfeast/joytag` Hugging Face repository the first time JoyTag is loaded.
 - **LLaVA:** was never downloaded automatically. Its GGUF model and projector had to be installed manually; support has now been removed together with `llama-cpp-python`.
 

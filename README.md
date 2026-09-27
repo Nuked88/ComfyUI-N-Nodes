@@ -183,42 +183,6 @@ Downloads happen on first model use, not merely when ComfyUI starts. An internet
 
 Connect an image and, for Moondream, a question or instruction in `prompt`. JoyTag uses `max_tags` to limit the number of returned tags. The advanced text-generation controls remain visible for workflow compatibility but no longer apply to GGUF text generation.
 
-### Why LLaVA was removed
-
-The old LLaVA implementation was not independent: both `Llama` and `Llava15ChatHandler` came from `llama-cpp-python`. Automatically downloading the LLaVA GGUF files would therefore not solve the native-library installation failure. Restoring LLaVA without restoring `llama-cpp-python` requires a new backend (for example Transformers) and a migration path for existing workflows. Such a replacement should download model weights only when the user executes the loader, show the repository and approximate download size, and use the normal Hugging Face cache rather than downloading during N-Suite import.
-
-## Installation and maintenance status
-
-N-Suite is published through the Comfy Registry and is installable by current versions of ComfyUI Manager. Dependencies are declared in both `pyproject.toml` and `requirements.txt`; the extension no longer runs `pip install` itself during import. A manual Git installation remains supported, but the user must install `requirements.txt` into the exact Python environment used by ComfyUI.
-
-### Testing this release through Manager Nightly
-
-ComfyUI Manager's **nightly** entry is the current Git revision from the repository's default branch; it is not a separate version published to the Comfy Registry. Consequently, a pull request cannot be selected as nightly while it is still unmerged. The test flow for this release is:
-
-1. merge the pull request into `main`;
-2. open ComfyUI Manager and select N-Suite's `nightly` version;
-3. restart ComfyUI and validate the nodes and existing workflows;
-4. only after validation, manually run the `Publish to Comfy registry` GitHub Actions workflow to publish version `1.2.0` as stable.
-
-The Registry workflow is deliberately manual: merging a change to `pyproject.toml` no longer publishes an untested stable version automatically. Before the merge, testers can still clone the pull-request branch manually under `custom_nodes`, but Manager will not label that branch as `nightly`.
-
-Practical-RIFE and the Moondream helper remain intentionally separate upstream repositories: their code is **not** copied, merged, or vendored into N-Suite. N-Suite clones each repository into its own directory under `libs/`, as before. To avoid silently running newer upstream code that has not been tested with this suite, each checkout is fixed to a known revision:
-
-- Practical-RIFE: `a8a8035323b1c1a4a20753c751780e5b0a879455` (12 August 2024);
-- N-Suite Moondream helper: `38af98596e59f2a6c25c6b52b2bd5a672dab4144` (29 January 2024);
-- the RIFE 4.7 model archive URL is fixed to DreamingAI revision `572480112b87f9bfbff7579b8a38b483766e455f` instead of the moving `main` branch.
-
-On startup, an existing managed checkout is returned to the corresponding revision. Local changes inside `libs/rifle` or `libs/moondream_repo` must therefore be committed or moved elsewhere before starting ComfyUI; Git deliberately refuses the checkout rather than overwriting them.
-
-### Known open issues checked on 27 September 2026
-
-- [#90](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/90) reports that MoviePy 2.x removed `moviepy.editor`. N-Suite currently uses that API, so dependencies are constrained to `moviepy<2` until the video nodes are migrated.
-- [#87](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/87), [#84](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/84), [#83](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/83), [#63](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/63), and [#56](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/56) report missing nodes or installation/import failures. Declaring all direct Python dependencies and removing runtime `pip` calls addresses part, but not necessarily all, of this group.
-- [#80](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/80), [#79](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/79), and [#75](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/75) are specifically about missing or incompatible `llama_cpp`; version 1.2 removes that failing integration.
-- [#89](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/89) reports creation of an output folder at startup; [#78](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/78), [#62](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/62), [#60](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/60), and [#59](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/59) cover video frame, memory and path handling and remain separate work.
-- [#66](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/66) and [#65](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/65) report frontend compatibility problems. The video previews now use ComfyUI's managed `addDOMWidget` lifecycle, the undefined global from #65 has been removed, and widget removal uses `removeWidget`; further reports should be checked against a current frontend build.
-
-This list is a triage summary, not a claim that the referenced issues are fixed merely by the packaging changes above.
 
 ## Image Pad For Outpainting Advanced 
 ![alt text](./img/image-14.png)

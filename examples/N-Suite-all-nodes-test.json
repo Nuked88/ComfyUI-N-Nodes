@@ -1,0 +1,2090 @@
+{
+  "id": "b9edba41-0f0f-45ba-b784-d1a97fb10e61",
+  "revision": 0,
+  "last_node_id": 28,
+  "last_link_id": 28,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        80,
+        100
+      ],
+      "size": [
+        380,
+        330
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "image"
+          }
+        },
+        {
+          "name": "upload",
+          "type": "IMAGEUPLOAD",
+          "widget": {
+            "name": "upload"
+          },
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            4,
+            6
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "example.png",
+        "image"
+      ],
+      "title": "Scegli la tua immagine"
+    },
+    {
+      "id": 2,
+      "type": "String Variable [n-suite]",
+      "pos": [
+        80,
+        500
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "String Variable [n-suite]"
+      },
+      "widgets_values": [
+        "What is in this image?,What colors are in this image?"
+      ],
+      "title": "Domande di prova"
+    },
+    {
+      "id": 3,
+      "type": "DynamicPrompt [n-suite]",
+      "pos": [
+        520,
+        490
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "variable_prompt",
+          "type": "STRING",
+          "link": 1
+        },
+        {
+          "name": "cached",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "cached"
+          }
+        },
+        {
+          "name": "number_of_random_tag",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "number_of_random_tag"
+          }
+        },
+        {
+          "name": "fixed_number_of_random_tag",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "fixed_number_of_random_tag"
+          }
+        },
+        {
+          "name": "fixed_prompt",
+          "type": "STRING",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "DynamicPrompt [n-suite]"
+      },
+      "widgets_values": [
+        "NO",
+        "Fixed",
+        1
+      ]
+    },
+    {
+      "id": 4,
+      "type": "GPT Loader Simple [n-suite]",
+      "pos": [
+        520,
+        100
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ckpt_name",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "ckpt_name"
+          }
+        },
+        {
+          "name": "gpu_layers",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "gpu_layers"
+          }
+        },
+        {
+          "name": "n_threads",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "n_threads"
+          }
+        },
+        {
+          "name": "max_ctx",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "max_ctx"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "CUSTOM",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPT Loader Simple [n-suite]"
+      },
+      "widgets_values": [
+        "moondream",
+        27,
+        8,
+        2048
+      ]
+    },
+    {
+      "id": 5,
+      "type": "GPT Sampler [n-suite]",
+      "pos": [
+        930,
+        100
+      ],
+      "size": [
+        390,
+        700
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "CUSTOM",
+          "link": 3
+        },
+        {
+          "name": "max_tokens",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "max_tokens"
+          }
+        },
+        {
+          "name": "temperature",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "temperature"
+          }
+        },
+        {
+          "name": "top_p",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "top_p"
+          }
+        },
+        {
+          "name": "logprobs",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "logprobs"
+          }
+        },
+        {
+          "name": "echo",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "echo"
+          }
+        },
+        {
+          "name": "stop_token",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "stop_token"
+          }
+        },
+        {
+          "name": "frequency_penalty",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "frequency_penalty"
+          }
+        },
+        {
+          "name": "presence_penalty",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "presence_penalty"
+          }
+        },
+        {
+          "name": "repeat_penalty",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "repeat_penalty"
+          }
+        },
+        {
+          "name": "top_k",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "top_k"
+          }
+        },
+        {
+          "name": "tfs_z",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "tfs_z"
+          }
+        },
+        {
+          "name": "print_output",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "print_output"
+          }
+        },
+        {
+          "name": "cached",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "cached"
+          }
+        },
+        {
+          "name": "prefix",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "prefix"
+          }
+        },
+        {
+          "name": "suffix",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "suffix"
+          }
+        },
+        {
+          "name": "max_tags",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "max_tags"
+          }
+        },
+        {
+          "name": "prompt",
+          "type": "STRING",
+          "link": 2
+        },
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 4
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GPT Sampler [n-suite]"
+      },
+      "widgets_values": [
+        128,
+        0.7,
+        0.5,
+        0,
+        "disable",
+        "STOPTOKEN",
+        0.0,
+        0.0,
+        1.17647,
+        40,
+        1.0,
+        "enable",
+        "NO",
+        "### Instruction: ",
+        "### Response: ",
+        50
+      ]
+    },
+    {
+      "id": 6,
+      "type": "PreviewAny",
+      "pos": [
+        1400,
+        150
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 5
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "Risposta Moondream"
+    },
+    {
+      "id": 7,
+      "type": "Float Variable [n-suite]",
+      "pos": [
+        80,
+        1040
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "value",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Float Variable [n-suite]"
+      },
+      "widgets_values": [
+        0.1
+      ]
+    },
+    {
+      "id": 8,
+      "type": "ImagePadForOutpaintAdvanced [n-suite]",
+      "pos": [
+        500,
+        930
+      ],
+      "size": [
+        430,
+        590
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 6
+        },
+        {
+          "name": "left",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "left"
+          }
+        },
+        {
+          "name": "top",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "top"
+          }
+        },
+        {
+          "name": "right",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "right"
+          }
+        },
+        {
+          "name": "bottom",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "bottom"
+          }
+        },
+        {
+          "name": "feathering",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "feathering"
+          }
+        },
+        {
+          "name": "noise",
+          "type": "FLOAT",
+          "link": 7,
+          "widget": {
+            "name": "noise"
+          }
+        },
+        {
+          "name": "pixel_size",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "pixel_size"
+          }
+        },
+        {
+          "name": "pixel_to_copy",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "pixel_to_copy"
+          }
+        },
+        {
+          "name": "temperature",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "temperature"
+          }
+        },
+        {
+          "name": "hue",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "hue"
+          }
+        },
+        {
+          "name": "brightness",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "brightness"
+          }
+        },
+        {
+          "name": "contrast",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "contrast"
+          }
+        },
+        {
+          "name": "saturation",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "saturation"
+          }
+        },
+        {
+          "name": "gamma",
+          "type": "FLOAT",
+          "link": null,
+          "widget": {
+            "name": "gamma"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            8
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [
+            9
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImagePadForOutpaintAdvanced [n-suite]"
+      },
+      "widgets_values": [
+        32,
+        32,
+        32,
+        32,
+        40,
+        0.1,
+        8,
+        32,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ]
+    },
+    {
+      "id": 9,
+      "type": "PreviewImage",
+      "pos": [
+        1030,
+        970
+      ],
+      "size": [
+        350,
+        300
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Immagine con bordo"
+    },
+    {
+      "id": 10,
+      "type": "MaskToImage",
+      "pos": [
+        1030,
+        1330
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "mask",
+          "type": "MASK",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            10
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "MaskToImage"
+      },
+      "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "PreviewImage",
+      "pos": [
+        1410,
+        1320
+      ],
+      "size": [
+        350,
+        300
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Maschera del bordo"
+    },
+    {
+      "id": 12,
+      "type": "CLIPLoader",
+      "pos": [
+        2030,
+        100
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip_name",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "clip_name"
+          }
+        },
+        {
+          "name": "type",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "type"
+          }
+        },
+        {
+          "name": "device",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "device"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            11
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "clip_l.safetensors",
+        "stable_diffusion",
+        "default"
+      ]
+    },
+    {
+      "id": 13,
+      "type": "CLIPTextEncodeAdvancedNSuite [n-suite]",
+      "pos": [
+        2460,
+        100
+      ],
+      "size": [
+        400,
+        350
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "styles",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "styles"
+          }
+        },
+        {
+          "name": "positive_prompt",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "positive_prompt"
+          }
+        },
+        {
+          "name": "negative_prompt",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "negative_prompt"
+          }
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 11
+        }
+      ],
+      "outputs": [
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "CLIPTextEncodeAdvancedNSuite [n-suite]"
+      },
+      "widgets_values": [
+        "NAI",
+        "a small test image",
+        "blurry"
+      ]
+    },
+    {
+      "id": 14,
+      "type": "PreviewAny",
+      "pos": [
+        2940,
+        100
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "Condizionamento positivo"
+    },
+    {
+      "id": 15,
+      "type": "PreviewAny",
+      "pos": [
+        2940,
+        400
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 13
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "Condizionamento negativo"
+    },
+    {
+      "id": 16,
+      "type": "Integer Variable [n-suite]",
+      "pos": [
+        80,
+        2060
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "value",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "value"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            16
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "Integer Variable [n-suite]"
+      },
+      "widgets_values": [
+        2
+      ]
+    },
+    {
+      "id": 17,
+      "type": "LoadVideo [n-suite]",
+      "pos": [
+        430,
+        1950
+      ],
+      "size": [
+        420,
+        570
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "video"
+          }
+        },
+        {
+          "name": "local_url",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "local_url"
+          }
+        },
+        {
+          "name": "framerate",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "framerate"
+          }
+        },
+        {
+          "name": "resize_by",
+          "type": "COMBO",
+          "link": null,
+          "widget": {
+            "name": "resize_by"
+          }
+        },
+        {
+          "name": "size",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "size"
+          }
+        },
+        {
+          "name": "images_limit",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "images_limit"
+          }
+        },
+        {
+          "name": "batch_size",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "batch_size"
+          }
+        },
+        {
+          "name": "starting_frame",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "starting_frame"
+          }
+        },
+        {
+          "name": "autoplay",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "autoplay"
+          }
+        },
+        {
+          "name": "use_ram",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "use_ram"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGES",
+          "type": "IMAGE",
+          "links": [
+            14
+          ]
+        },
+        {
+          "name": "EMPTY LATENTS",
+          "type": "LATENT",
+          "links": []
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "links": [
+            15,
+            19
+          ]
+        },
+        {
+          "name": "WIDTH",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "HEIGHT",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "META_FPS",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "META_N_FRAMES",
+          "type": "INT",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadVideo [n-suite]"
+      },
+      "widgets_values": [
+        "SELECT_VIDEO.mp4",
+        "",
+        "original",
+        "none",
+        512,
+        0,
+        0,
+        0,
+        false,
+        false
+      ]
+    },
+    {
+      "id": 18,
+      "type": "FrameInterpolator [n-suite]",
+      "pos": [
+        940,
+        1990
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 14
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "link": 15
+        },
+        {
+          "name": "multiplier",
+          "type": "INT",
+          "link": 16,
+          "widget": {
+            "name": "multiplier"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGES",
+          "type": "IMAGE",
+          "links": [
+            17
+          ]
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "links": [
+            18
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FrameInterpolator [n-suite]"
+      },
+      "widgets_values": [
+        2
+      ]
+    },
+    {
+      "id": 19,
+      "type": "SaveVideo [n-suite]",
+      "pos": [
+        1430,
+        1970
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 17
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "link": 18
+        },
+        {
+          "name": "SaveVideo",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "SaveVideo"
+          }
+        },
+        {
+          "name": "SaveFrames",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "SaveFrames"
+          }
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "name": "CompressionLevel",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "CompressionLevel"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveVideo [n-suite]"
+      },
+      "widgets_values": [
+        true,
+        false,
+        "n_suite_test_interpolated",
+        2
+      ]
+    },
+    {
+      "id": 20,
+      "type": "PreviewAny",
+      "pos": [
+        940,
+        2290
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "source",
+          "type": "*",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewAny"
+      },
+      "widgets_values": [],
+      "title": "Metadati video originale"
+    },
+    {
+      "id": 21,
+      "type": "String Variable [n-suite]",
+      "pos": [
+        80,
+        2990
+      ],
+      "size": [
+        500,
+        130
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "string",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "string"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "STRING",
+          "type": "STRING",
+          "links": [
+            20,
+            21
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "String Variable [n-suite]"
+      },
+      "widgets_values": [
+        "/workspace/ComfyUI/input/n-suite/test_frames"
+      ],
+      "title": "Cartella frame: cambia qui"
+    },
+    {
+      "id": 22,
+      "type": "LoadImageFromFolder [n-suite]",
+      "pos": [
+        660,
+        2860
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "folder",
+          "type": "STRING",
+          "link": 20,
+          "widget": {
+            "name": "folder"
+          }
+        },
+        {
+          "name": "fps",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGES",
+          "type": "IMAGE",
+          "links": [
+            22,
+            23
+          ]
+        },
+        {
+          "name": "MAX WIDTH",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "MAX HEIGHT",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "IMAGE COUNT",
+          "type": "INT",
+          "links": [
+            24
+          ]
+        },
+        {
+          "name": "PATH",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "IMAGE LIST",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImageFromFolder [n-suite]"
+      },
+      "widgets_values": [
+        "",
+        30
+      ]
+    },
+    {
+      "id": 23,
+      "type": "PreviewImage",
+      "pos": [
+        1100,
+        2840
+      ],
+      "size": [
+        330,
+        260
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 22
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Immagini dalla cartella"
+    },
+    {
+      "id": 24,
+      "type": "SetMetadataForSaveVideo [n-suite]",
+      "pos": [
+        1100,
+        3210
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "number_of_frames",
+          "type": "INT",
+          "link": 24,
+          "widget": {
+            "name": "number_of_frames"
+          }
+        },
+        {
+          "name": "fps",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "fps"
+          }
+        },
+        {
+          "name": "VideoName",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "VideoName"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SetMetadataForSaveVideo [n-suite]"
+      },
+      "widgets_values": [
+        1,
+        24,
+        "n_suite_folder"
+      ]
+    },
+    {
+      "id": 25,
+      "type": "SaveVideo [n-suite]",
+      "pos": [
+        1550,
+        2890
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 23
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "link": 25
+        },
+        {
+          "name": "SaveVideo",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "SaveVideo"
+          }
+        },
+        {
+          "name": "SaveFrames",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "SaveFrames"
+          }
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "name": "CompressionLevel",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "CompressionLevel"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveVideo [n-suite]"
+      },
+      "widgets_values": [
+        true,
+        false,
+        "n_suite_test_manual_metadata",
+        2
+      ]
+    },
+    {
+      "id": 26,
+      "type": "LoadFramesFromFolder [n-suite]",
+      "pos": [
+        660,
+        3530
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "folder",
+          "type": "STRING",
+          "link": 21,
+          "widget": {
+            "name": "folder"
+          }
+        },
+        {
+          "name": "fps",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "fps"
+          }
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGES",
+          "type": "IMAGE",
+          "links": [
+            26,
+            27
+          ]
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "links": [
+            28
+          ]
+        },
+        {
+          "name": "MAX WIDTH",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "MAX HEIGHT",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "FRAME COUNT",
+          "type": "INT",
+          "links": []
+        },
+        {
+          "name": "PATH",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "IMAGE LIST",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadFramesFromFolder [n-suite]"
+      },
+      "widgets_values": [
+        "",
+        24
+      ]
+    },
+    {
+      "id": 27,
+      "type": "PreviewImage",
+      "pos": [
+        1100,
+        3520
+      ],
+      "size": [
+        330,
+        260
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PreviewImage"
+      },
+      "widgets_values": [],
+      "title": "Frame numerati"
+    },
+    {
+      "id": 28,
+      "type": "SaveVideo [n-suite]",
+      "pos": [
+        1550,
+        3510
+      ],
+      "size": [
+        350,
+        180
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 27
+        },
+        {
+          "name": "METADATA",
+          "type": "STRING",
+          "link": 28
+        },
+        {
+          "name": "SaveVideo",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "SaveVideo"
+          }
+        },
+        {
+          "name": "SaveFrames",
+          "type": "BOOLEAN",
+          "link": null,
+          "widget": {
+            "name": "SaveFrames"
+          }
+        },
+        {
+          "name": "filename_prefix",
+          "type": "STRING",
+          "link": null,
+          "widget": {
+            "name": "filename_prefix"
+          }
+        },
+        {
+          "name": "CompressionLevel",
+          "type": "INT",
+          "link": null,
+          "widget": {
+            "name": "CompressionLevel"
+          }
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "Node name for S&R": "SaveVideo [n-suite]"
+      },
+      "widgets_values": [
+        true,
+        false,
+        "n_suite_test_folder_frames",
+        2
+      ]
+    }
+  ],
+  "links": [
+    [
+      1,
+      2,
+      0,
+      3,
+      0,
+      "STRING"
+    ],
+    [
+      2,
+      3,
+      0,
+      5,
+      17,
+      "STRING"
+    ],
+    [
+      3,
+      4,
+      0,
+      5,
+      0,
+      "CUSTOM"
+    ],
+    [
+      4,
+      1,
+      0,
+      5,
+      18,
+      "IMAGE"
+    ],
+    [
+      5,
+      5,
+      0,
+      6,
+      0,
+      "STRING"
+    ],
+    [
+      6,
+      1,
+      0,
+      8,
+      0,
+      "IMAGE"
+    ],
+    [
+      7,
+      7,
+      0,
+      8,
+      6,
+      "FLOAT"
+    ],
+    [
+      8,
+      8,
+      0,
+      9,
+      0,
+      "IMAGE"
+    ],
+    [
+      9,
+      8,
+      1,
+      10,
+      0,
+      "MASK"
+    ],
+    [
+      10,
+      10,
+      0,
+      11,
+      0,
+      "IMAGE"
+    ],
+    [
+      11,
+      12,
+      0,
+      13,
+      3,
+      "CLIP"
+    ],
+    [
+      12,
+      13,
+      0,
+      14,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      13,
+      13,
+      1,
+      15,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      14,
+      17,
+      0,
+      18,
+      0,
+      "IMAGE"
+    ],
+    [
+      15,
+      17,
+      2,
+      18,
+      1,
+      "STRING"
+    ],
+    [
+      16,
+      16,
+      0,
+      18,
+      2,
+      "INT"
+    ],
+    [
+      17,
+      18,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      18,
+      18,
+      1,
+      19,
+      1,
+      "STRING"
+    ],
+    [
+      19,
+      17,
+      2,
+      20,
+      0,
+      "STRING"
+    ],
+    [
+      20,
+      21,
+      0,
+      22,
+      0,
+      "STRING"
+    ],
+    [
+      21,
+      21,
+      0,
+      26,
+      0,
+      "STRING"
+    ],
+    [
+      22,
+      22,
+      0,
+      23,
+      0,
+      "IMAGE"
+    ],
+    [
+      23,
+      22,
+      0,
+      25,
+      0,
+      "IMAGE"
+    ],
+    [
+      24,
+      22,
+      3,
+      24,
+      0,
+      "INT"
+    ],
+    [
+      25,
+      24,
+      0,
+      25,
+      1,
+      "STRING"
+    ],
+    [
+      26,
+      26,
+      0,
+      27,
+      0,
+      "IMAGE"
+    ],
+    [
+      27,
+      26,
+      0,
+      28,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      26,
+      1,
+      28,
+      1,
+      "STRING"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "01 FOTO + MOONDREAM: scegli la foto in LoadImage",
+      "bounding": [
+        40,
+        40,
+        1750,
+        790
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "02 IMAGE PAD: controlla immagine e maschera",
+      "bounding": [
+        40,
+        870,
+        1760,
+        790
+      ],
+      "color": "#637c49",
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "03 CLIP: usa il modello clip_l presente",
+      "bounding": [
+        1980,
+        40,
+        1400,
+        680
+      ],
+      "color": "#76578e",
+      "flags": {}
+    },
+    {
+      "id": 4,
+      "title": "04 VIDEO: copia un MP4 in input/n-suite, ricarica e selezionalo",
+      "bounding": [
+        40,
+        1880,
+        1790,
+        690
+      ],
+      "color": "#896a3c",
+      "flags": {}
+    },
+    {
+      "id": 5,
+      "title": "05 CARTELLA: aggiungi 0001.png e 0002.png in test_frames",
+      "bounding": [
+        40,
+        2780,
+        1920,
+        1050
+      ],
+      "color": "#3f789e",
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.55,
+      "offset": [
+        70,
+        70
+      ]
+    }
+  },
+  "version": 0.4
+}

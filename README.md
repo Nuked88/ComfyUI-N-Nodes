@@ -38,6 +38,10 @@ For uninstallation, remove the extension through ComfyUI Manager or delete its f
 # Update
 Update through ComfyUI Manager. For a manual install, run `git pull` in the cloned extension directory, install `requirements.txt` again in ComfyUI's Python environment, and restart ComfyUI.
 
+## Test workflow
+
+[`examples/N-Suite-all-nodes-test.json`](examples/N-Suite-all-nodes-test.json) connects all 14 N-Suite node types in one workflow. Follow the [test instructions](examples/README.md) to add an image, a short MP4, and numbered PNG frames before running it.
+
 # Features
 
 ## 📽️ Video Nodes 📽️

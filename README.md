@@ -157,11 +157,22 @@ The node-variables are:
 
 ## 🤖 Image captioning: GPTLoaderSimple and GPTSampler 🤖
 
-The legacy node identifiers are retained so existing Moondream and JoyTag workflows continue to load, but these nodes are now limited to image captioning:
+#### Moondream
+The model will be automatically downloaded when you run the first time.Only the required code, tokenizer, and single `model.safetensors` file are downloaded from a pinned revision of `vikhyatk/moondream1` on Hugging Face. The model file is about **3.72 GB**; the repository also contains larger alternative weights that are not downloaded.
+Anyway, it is available [HERE](https://huggingface.co/vikhyatk/moondream1/tree/main)
+The code taken from [this repository](https://github.com/vikhyat/moondream)
 
-- **Moondream:** only the required code, tokenizer, and single `model.safetensors` file are downloaded from a pinned revision of `vikhyatk/moondream1` on Hugging Face. The model file is about **3.72 GB**; the repository also contains larger alternative weights that are not downloaded.
-- **JoyTag:** only the required configuration, tags, and `model.safetensors` are downloaded from a pinned revision of `fancyfeast/joytag`. The model file is about **0.37 GB**; the unused ONNX file is not downloaded.
-- **LLaVA:** was never downloaded automatically. Its GGUF model and projector had to be installed manually; support has now been removed together with `llama-cpp-python`.
+####Example with Moondream model:
+![alt text](./img/image-15.png)
+
+#### Joytag
+The model will be automatically downloaded when you run the first time.Only the required configuration, tags, and `model.safetensors` are downloaded from a pinned revision of `fancyfeast/joytag`. The model file is about **0.37 GB**; the unused ONNX file is not downloaded.
+Anyway, it is available [HERE](https://huggingface.co/fancyfeast/joytag/tree/main)
+The code taken from [this repository](https://github.com/fpgaminer/joytag)
+
+####Example with Joytag model:
+![alt text](./img/image-16.png)
+
 
 Downloads happen on first model use, not merely when ComfyUI starts. An internet connection and sufficient disk space are required for that initial load. Models are stored under `ComfyUI/models/GPTcheckpoints/moondream` and `ComfyUI/models/GPTcheckpoints/joytag`.
 GPT Loader Simple displays a download notice when the selected model file is missing. The ComfyUI console shows the download progress.

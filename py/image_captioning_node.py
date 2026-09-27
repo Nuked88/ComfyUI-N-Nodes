@@ -7,7 +7,7 @@ from huggingface_hub import snapshot_download
 sys.path.append(os.path.join(str(Path(__file__).parent.parent),"libs"))
 import joytag_models
 from PIL import Image
-from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer
+from transformers import AutoModelForCausalLM, CodeGenTokenizerFast as Tokenizer, GenerationConfig, GenerationMixin
 from server import PromptServer
 #,AutoTokenizer, AutoModelForCausalLM
 import numpy as np
@@ -131,9 +131,37 @@ def load_moondream(ckpt_path,cpu=False):
         ],
     )
     tokenizer = Tokenizer.from_pretrained(model_dir)
-    moondream = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True).to(device=device, dtype=dtype)
+    moondream = AutoModelForCausalLM.from_pretrained(model_dir, trust_remote_code=True)
+    enable_moondream_generation(moondream)
+    moondream = moondream.to(device=device, dtype=dtype)
     moondream.eval()
     return [moondream, tokenizer]
+
+
+def enable_moondream_generation(moondream):
+    """Restore generation for Moondream1's legacy Phi model on Transformers 4.50+."""
+    text_model = moondream.text_model
+    if isinstance(text_model, GenerationMixin):
+        return
+
+    class GeneratingPhiForCausalLM(type(text_model), GenerationMixin):
+        def prepare_inputs_for_generation(
+            self, input_ids=None, inputs_embeds=None, past_key_values=None,
+            attention_mask=None, **kwargs,
+        ):
+            prepared = super().prepare_inputs_for_generation(
+                input_ids=input_ids, inputs_embeds=inputs_embeds,
+                past_key_values=past_key_values, attention_mask=attention_mask,
+                **kwargs,
+            )
+            # Moondream supplies image embeddings without padding. The newer
+            # generation API otherwise builds a mask one token too long.
+            prepared["attention_mask"] = None
+            return prepared
+
+    text_model.__class__ = GeneratingPhiForCausalLM
+    if text_model.generation_config is None:
+        text_model.generation_config = GenerationConfig.from_model_config(text_model.config)
     
 
 

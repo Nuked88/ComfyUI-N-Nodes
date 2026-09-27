@@ -165,6 +165,7 @@ The legacy node identifiers are retained so existing Moondream and JoyTag workfl
 
 Downloads happen on first model use, not merely when ComfyUI starts. An internet connection and sufficient disk space are required for that initial load. Models are stored under `ComfyUI/models/GPTcheckpoints/moondream` and `ComfyUI/models/GPTcheckpoints/joytag`.
 GPT Loader Simple displays a download notice when the selected model file is missing. The ComfyUI console shows the download progress.
+Moondream1 uses legacy Phi model code; N-Suite adapts its text model for `GenerationMixin` when running with newer Transformers releases.
 
 ### GPTLoaderSimple
 

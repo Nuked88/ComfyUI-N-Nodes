@@ -1,142 +1,96 @@
 import { app } from "/scripts/app.js";
-import { api } from "/scripts/api.js"
-import { ExtendedComfyWidgets,showVideoInput } from "./extended_widgets.js";
-const MultilineSymbol = Symbol();
-const MultilineResizeSymbol = Symbol();
+import { api } from "/scripts/api.js";
+import { ExtendedComfyWidgets, showVideoInput } from "./extended_widgets.js";
 
+const VIDEO_TYPES = new Set(["video/mp4", "video/webm", "image/gif"]);
 
 async function uploadFile(file, updateNode, node, pasted = false) {
-	const videoWidget = node.widgets.find((w) => w.name === "video");
-	
-	
+	const videoWidget = node.widgets?.find((widget) => widget.name === "video");
+	if (!videoWidget) return false;
+
 	try {
-		// Wrap file in formdata so it includes filename
 		const body = new FormData();
 		body.append("image", file);
-		if (pasted) {
-			body.append("subfolder", "pasted");
+		body.append("subfolder", pasted ? "pasted" : "n-suite");
+		const response = await api.fetchApi("/upload/image", { method: "POST", body });
+		if (!response.ok) {
+			alert(`${response.status} - ${response.statusText}`);
+			return false;
 		}
-		else {
-			body.append("subfolder", "n-suite");
-		}
-	
-		const resp = await api.fetchApi("/upload/image", {
-			method: "POST",
-			body,
-		});
 
-		if (resp.status === 200) {
-			const data = await resp.json();
-			// Add the file to the dropdown list and update the widget value
-			let path = data.name;
-			
-
-			if (!videoWidget.options.values.includes(path)) {
-				videoWidget.options.values.push(path);
-			}
-			
-			if (updateNode) {
-		
-				videoWidget.value = path;
-				if (data.subfolder) path = data.subfolder + "/" + path;
-				showVideoInput(path,node);
-				
-			}
-		} else {
-			alert(resp.status + " - " + resp.statusText);
+		const data = await response.json();
+		const value = data.name;
+		const previewPath = data.subfolder ? `${data.subfolder}/${value}` : value;
+		if (!videoWidget.options.values.includes(value)) videoWidget.options.values.push(value);
+		if (updateNode) {
+			const oldValue = videoWidget.value;
+			videoWidget.value = value;
+			videoWidget.callback?.(value);
+			node.onWidgetChanged?.(videoWidget.name, value, oldValue, videoWidget);
+			showVideoInput(previewPath, node);
 		}
+		return true;
 	} catch (error) {
-		alert(error);
+		console.error("N-Suite video upload failed", error);
+		alert(String(error));
+		return false;
 	}
 }
 
-
-
-
-let uploadWidget = "";
 app.registerExtension({
 	name: "Comfy.VideoLoadAdvanced",
-	async beforeRegisterNodeDef(nodeType, nodeData, app) {
+	async beforeRegisterNodeDef(nodeType, nodeData) {
+		if (nodeData.name !== "LoadVideo [n-suite]") return;
 
 		const onAdded = nodeType.prototype.onAdded;
-		if (nodeData.name === "LoadVideo [n-suite]") {
+		const onRemoved = nodeType.prototype.onRemoved;
 		nodeType.prototype.onAdded = function () {
 			onAdded?.apply(this, arguments);
-			const temp_web_url = this.widgets.find((w) => w.name === "local_url");
-			const autoplay_value = this.widgets.find((w) => w.name === "autoplay");
-		
-			
-			let uploadWidget;
+			const localUrl = this.widgets?.find((widget) => widget.name === "local_url");
+			const autoplay = this.widgets?.find((widget) => widget.name === "autoplay");
 			const fileInput = document.createElement("input");
-			Object.assign(fileInput, {
-				type: "file",
-				accept: "video/mp4,image/gif,video/webm",
-				style: "display: none",
-				onchange: async () => {
-					if (fileInput.files.length) {
-						await uploadFile(fileInput.files[0], true,this);
-					}
-				},
-			});
+			fileInput.type = "file";
+			fileInput.accept = "video/mp4,video/webm,image/gif";
+			fileInput.hidden = true;
+			fileInput.onchange = async () => {
+				if (fileInput.files?.length) await uploadFile(fileInput.files[0], true, this);
+			};
 			document.body.append(fileInput);
-			// Create the button widget for selecting the files
-			uploadWidget = this.addWidget("button", "choose file to upload", "image", () => {
-				fileInput.click();
-			},{
-				cursor: "grab",
-			},);
+			this.__nSuiteVideoFileInput = fileInput;
+
+			const uploadWidget = this.addWidget("button", "choose file to upload", "image", () => fileInput.click());
 			uploadWidget.serialize = false;
-
-
-		setTimeout(() => {
-			ExtendedComfyWidgets["VIDEO"](this, "videoWidget", ["STRING"], temp_web_url.value, app,"input", autoplay_value.value);
-		
-		}, 100); 
-		
-		
-		}
-	
-
-			nodeType.prototype.onDragOver = function (e) {
-				if (e.dataTransfer && e.dataTransfer.items) {
-					const image = [...e.dataTransfer.items].find((f) => f.kind === "file");
-					return !!image;
-				}
-	
-				return false;
-			};
-	
-			// On drop upload files
-			nodeType.prototype.onDragDrop = function (e) {
-				console.log("onDragDrop called");
-				let handled = false;
-				for (const file of e.dataTransfer.files) {
-					if (file.type.startsWith("video/mp4")) {
-						
-						const filePath = file.path || (file.webkitRelativePath || '').split('/').slice(1).join('/'); 
-
-
-						uploadFile(file, !handled,this ); // Dont await these, any order is fine, only update on first one
-
-						handled = true;
-					}
-				}
-	
-				return handled;
-			};
-	
-			nodeType.prototype.pasteFile = function(file) {
-				if (file.type.startsWith("video/mp4")) {
-
-					//uploadFile(file, true, is_pasted);
-
-					return true;
-				}
-				return false;
-			}
-
-
+			ExtendedComfyWidgets.VIDEO(
+				this,
+				"videoWidget",
+				["STRING"],
+				localUrl?.value ?? "",
+				app,
+				"input",
+				autoplay?.value ?? true,
+			);
 		};
-		
+		nodeType.prototype.onRemoved = function () {
+			this.__nSuiteVideoFileInput?.remove();
+			delete this.__nSuiteVideoFileInput;
+			onRemoved?.apply(this, arguments);
+		};
+		nodeType.prototype.onDragOver = function (event) {
+			return [...(event.dataTransfer?.items ?? [])].some((item) => item.kind === "file");
+		};
+		nodeType.prototype.onDragDrop = function (event) {
+			let handled = false;
+			for (const file of event.dataTransfer?.files ?? []) {
+				if (!VIDEO_TYPES.has(file.type)) continue;
+				uploadFile(file, !handled, this);
+				handled = true;
+			}
+			return handled;
+		};
+		nodeType.prototype.pasteFile = function (file) {
+			if (!VIDEO_TYPES.has(file.type)) return false;
+			uploadFile(file, true, this, true);
+			return true;
+		};
 	},
 });

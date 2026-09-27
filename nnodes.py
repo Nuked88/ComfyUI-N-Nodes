@@ -1,18 +1,12 @@
 import asyncio
 import os
 import json
-import shutil
 import inspect
 import aiohttp
 from server import PromptServer
 from tqdm import tqdm
 import requests
-import subprocess
-import platform
-import importlib.util
-import torch
 import folder_paths
-import sys
 
 
 
@@ -72,148 +66,6 @@ def get_commit():
     except:
         return 0
 
-def check_nvidia_gpu():
-    try:
-        # Utilizza torch per verificare la presenza di una GPU NVIDIA
-        return torch.cuda.is_available() and 'NVIDIA' in torch.cuda.get_device_name(0)
-    except Exception as e:
-        print(f"Error while checking for NVIDIA GPU: {e}")
-        return False
-
-def get_cuda_version():
-    try:
-        if torch.cuda.is_available():
-            cuda_version = torch.version.cuda.replace(".","").strip()
-
-            return "cu"+cuda_version
-        else:
-            return "No NVIDIA GPU available"
-    except Exception as e:
-        print(f"Error while checking CUDA version: {e}")
-        return "Unable to determine CUDA version"
-
-def check_avx2_support():
-    import cpuinfo
-    try:
-        info = cpuinfo.get_cpu_info()
-        return 'avx2' in info['flags']
-    except Exception as e:
-        print(f"Error while checking AVX2 support: {e}")
-        return False
-
-def get_python_version():
-    if "3.9" in platform.python_version():
-        return "39"
-    elif "3.10" in platform.python_version():
-        return "310"
-    elif "3.11" in platform.python_version():
-        return "311"
-    else:
-        return None
-
-
-def get_os():
-    return platform.system()
-
-def get_os_bit():
-    return platform.architecture()[0].replace("bit","")
-
-def get_platform_tag():
-    #return the first tag in the list of tags
-    try:
-        import packaging.tags
-        return list(packaging.tags.sys_tags())[0]
-    except:
-        return None
-def get_last_llcpppy_version():
-    try:
-        import requests
-    
-        response = requests.get("https://api.github.com/repos/abetlen/llama-cpp-python/releases/latest")
-        
-        
-        return response.json()["tag_name"].replace("v","")
-    except:
-        return "0.2.20"
-
-from packaging import version
-
-def check_and_install(package, import_name="", desired_version=None,reboot=False):
-    if import_name == "":
-        import_name = package
-    try:
-        library_module = importlib.import_module(import_name)
-        current_version  = getattr(library_module, '__version__', None)
-        if current_version :
-            if current_version:
-                print(f"Current version of {import_name}: {current_version}")
-            if desired_version:
-                if version.parse(current_version) < version.parse(desired_version):
-                    print(f"Updating {import_name} to version {desired_version}...")
-                    install_package(f"{package}=={desired_version}")
-                    print(f"{import_name} updated successfully to version {desired_version}")
-                #else:
-                #    print(f"{import_name} is already up-to-date with version {current_version}")
-
-        else:
-            print(f"Version of {import_name}: Not found")
-
-        
-    except ImportError:
-        print(f"Installing {import_name}...")
-        if package == "llama_cpp":
-            install_llama()
-        else:
-            install_package(package)
-            if reboot:
-                print(f"{color.RED}------------------------------------------{color.END}")
-                print(f"{color.RED}IMPORTANT: Please reboot ComfyUI!{color.END}")
-                print(f"{color.RED}------------------------------------------{color.END}")
-
-def install_package(package):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-cache-dir", package])
-
-def install_llama():
-    try:
-        gpu = check_nvidia_gpu()
-        avx2 = check_avx2_support()
-        lcpVersion = get_last_llcpppy_version()
-        python_version = get_python_version()
-        os = get_os()
-        os_bit = get_os_bit()
-        platform_tag = get_platform_tag()
-        print(f"Python version: {python_version}")
-        print(f"OS: {os}")
-        print(f"OS bit: {os_bit}")
-        print(f"Platform tag: {platform_tag}")
-        if python_version == None:
-            print("Unsupported Python version. Please use Python 3.9, 3.10 or 3.11.")
-            return
-        
-
-        #python -m pip install llama-cpp-python --force-reinstall --no-deps --index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/AVX2/cu117
-        if avx2:
-            avx="AVX2"
-        else:
-            avx="AVX"
-
-        if gpu:
-            cuda = get_cuda_version()
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "llama-cpp-python", "--no-cache-dir", "--force-reinstall", "--no-deps" , f"--index-url=https://jllllll.github.io/llama-cpp-python-cuBLAS-wheels/{avx}/{cuda}"])
-        else:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", f"https://github.com/abetlen/llama-cpp-python/releases/download/v{lcpVersion}/llama_cpp_python-{lcpVersion}-{platform_tag}.whl"])
-    except Exception as e:
-        print(f"Error while installing LLAMA: {e}")
-# llama wheels https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels
-
-def check_module(package):
-    import importlib
-    try:
-        print("Detected: ", package)
-        importlib.import_module(package)
-        return True
-    except ImportError:
-        return False
 import zipfile
 
 

@@ -1,7 +1,7 @@
-py-cpuinfo
 gitpython
-moviepy
+huggingface-hub
+moviepy<2
 opencv-python
 scikit-build
-typing
-diskcache
+timm==0.9.12
+transformers==4.36.2

@@ -1,11 +1,10 @@
 name: Publish to Comfy registry
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - "pyproject.toml"
+
+# Merging into main makes the commit available as the Manager's "nightly"
+# version. Stable Registry releases are intentionally published only by
+# manually running this workflow after nightly validation.
 
 permissions:
   issues: write

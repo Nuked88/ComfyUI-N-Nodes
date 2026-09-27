@@ -1,8 +1,5 @@
 import folder_paths
 import os
-from io import BytesIO
-from llama_cpp import Llama
-from llama_cpp.llama_chat_format import Llava15ChatHandler
 from pathlib import Path
 import sys
 import torch
@@ -14,12 +11,11 @@ try:
     moondream_loaded = True
 except Exception as e:
     moondream_loaded = False
-    print(f"Moondream error: You should probably run install_extra.bat (windows) or install transformers==4.36.2 in the enviroment.\n Also torch must be >= 2.1.0 (ERROR: {e})")
+    print(f"Moondream error: reinstall N-Suite dependencies with ComfyUI Manager or requirements.txt.\nTorch must be >= 2.1.0 (ERROR: {e})")
 from PIL import Image
 from transformers import CodeGenTokenizerFast as Tokenizer
 #,AutoTokenizer, AutoModelForCausalLM
 import numpy as np
-import base64
 
 models_base_path = os.path.join(folder_paths.models_dir, "GPTcheckpoints")
 _choice = ["YES", "NO"]
@@ -169,7 +165,7 @@ def run_moondream(images, prompt, max_tags, model_funct):
             list_descriptions.append(moondream.answer_question(image_embeds, prompt,tokenizer))
         except ValueError:
             print("\n\n\n")
-            raise ModuleNotFoundError("Please run install_extra.bat in custom_nodes/ComfyUI-N-Nodes folder to make sure to have the required verision of Transformers installed (4.36.2).")
+            raise ModuleNotFoundError("Moondream requires the dependency versions declared in N-Suite requirements.txt. Reinstall dependencies with ComfyUI Manager.")
 
 
 
@@ -253,33 +249,6 @@ def run_internlm(image, prompt, max_tags, model_funct):
      
 
 
-def llava_inference(model_funct,prompt,images,max_tokens,stop_token,frequency_penalty,presence_penalty,repeat_penalty,temperature,top_k,top_p):
-        list_descriptions = []
-        for image in images:
-            pil_image = tensor2pil(image)
-            # Convert the PIL image to a bytes buffer
-            buffer = BytesIO()
-            pil_image.save(buffer, format="JPEG")  # You can change the format if needed
-            image_bytes = buffer.getvalue()
-            base64_string = f"data:image/jpeg;base64,{base64.b64encode(image_bytes).decode('utf-8')}"
-
-            response = model_funct.create_chat_completion( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,
-                                                        temperature=temperature,top_k=top_k,top_p=top_p,
-                messages = [
-                    {"role": "system", "content": "You are an assistant who perfectly describes images."},
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "image_url", "image_url": {"url": base64_string}},
-                            {"type" : "text", "text": prompt}
-                        ]
-                    }
-                ]
-            )
-            list_descriptions.append(response['choices'][0]['message']['content'])
-        return list_descriptions
-
-
 if not os.path.isdir(models_base_path):
         os.mkdir(models_base_path)
 
@@ -294,16 +263,6 @@ if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","moo
 if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","internlm")):
         os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","internlm"))
 """
-if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava")):
-        os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava"))
-
-if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava","models")):
-        os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava","models"))
-
-if not os.path.isdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava","clips")):
-        os.mkdir(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava","clips"))
-
-
 #folder_paths.folder_names_and_paths["GPTcheckpoints"] += (os.listdir(models_base_path),)
 
 
@@ -321,34 +280,8 @@ MODEL_LOAD_FUNCTIONS = {
 
 
 
-supported_gpt_extensions = set(['.gguf'])
-supported_clip_extensions = set(['.gguf','.bin'])
-model_external_path = None
-
-all_models = []
-
-try:
-    model_external_path = folder_paths.folder_names_and_paths["GPTcheckpoints"][0][0]
-except:
-    # no external folder
-    pass
-
-
-
-all_llava_models =  get_model_list(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava","models"),supported_gpt_extensions)
-all_llava_clips =  get_model_list(os.path.join(folder_paths.models_dir, "GPTcheckpoints","llava","clips"),supported_clip_extensions)
-
-all_models =  get_model_list(models_base_path,supported_gpt_extensions)
-if model_external_path is not None:
-    all_models += get_model_list(model_external_path,supported_gpt_extensions)
-all_models += all_llava_models
-
-
-
-#extract only names
+all_models = get_model_list(models_base_path, set())
 all_models_names = [os.path.basename(model) for model in all_models]
-
-all_clips_names = [os.path.basename(model) for model in all_llava_clips]
 
 
 
@@ -360,38 +293,23 @@ class GPTLoaderSimple:
               "gpu_layers": ("INT", {"default": 27, "min": 0, "max": 100, "step": 1}),
               "n_threads": ("INT", {"default": 8, "min": 1, "max": 100, "step": 1}),
               "max_ctx": ("INT", {"default": 2048, "min": 300, "max": 100000, "step": 64}),
-                             },
-             "optional": {
-             "llava_clip": ("LLAVA_CLIP", ),
-           
-             }}
+                             }}
     
 
 
     RETURN_TYPES = ("CUSTOM", )
     RETURN_NAMES = ("model",)
     FUNCTION = "load_gpt_checkpoint"
-    DESCRIPTION = "Loads a GPT checkpoint (GGUF format)<img src='https://compote.slate.com/images/697b023b-64a5-49a0-8059-27b963453fb1.gif?crop=780%2C520%2Cx0%2Cy0&width=1280' />"
+    DESCRIPTION = "Loads a Moondream or JoyTag image-captioning model. GGUF and LLaVA support was removed in version 1.2.0."
 
     CATEGORY = "N-Suite/loaders"
  
-    def load_gpt_checkpoint(self, ckpt_name, gpu_layers,n_threads,max_ctx,llava_clip=None):
+    def load_gpt_checkpoint(self, ckpt_name, gpu_layers, n_threads, max_ctx):
         ckpt_path = get_model_path(all_models,ckpt_name)
-        llm = None
-        #if is path
-        if os.path.isfile(ckpt_path):
-            print("GPT MODEL DETECTED")
-            if "llava" in ckpt_path:
-                if llava_clip is None:
-                     raise ValueError("Please provide a llava clip")
-                llm = Llama(model_path=ckpt_path,n_gpu_layers=gpu_layers,verbose=False,n_threads=n_threads, n_ctx=max_ctx, logits_all=True,chat_handler=llava_clip)
-            else:
-                llm = Llama(model_path=ckpt_path,n_gpu_layers=gpu_layers,verbose=False,n_threads=n_threads, n_ctx=max_ctx )
-        else:
-            if ckpt_name in MODEL_LOAD_FUNCTIONS :
-
-                cpu = False if gpu_layers > 0 else True
-                llm = MODEL_LOAD_FUNCTIONS[ckpt_name](ckpt_path,cpu)
+        if ckpt_name not in MODEL_LOAD_FUNCTIONS:
+            raise ValueError(f"Unsupported model: {ckpt_name}")
+        cpu = gpu_layers == 0
+        llm = MODEL_LOAD_FUNCTIONS[ckpt_name](ckpt_path, cpu)
 
         return ([llm, ckpt_name, ckpt_path],)
 
@@ -465,21 +383,10 @@ class GPTSampler:
 
 
         if cached == "NO":
-            if  model_name in MODEL_FUNCTIONS and os.path.isdir(model_path):
+            if model_name in MODEL_FUNCTIONS and os.path.isdir(model_path):
                 cont = MODEL_FUNCTIONS[model_name](image, prompt, max_tags, model_funct)
-
             else:
-                if "llava" in model_path:
-                    cont = llava_inference(model_funct,prompt,image,max_tokens,stop_token,frequency_penalty,presence_penalty,repeat_penalty,temperature,top_k,top_p)
-                    
-                                
-                else:
-                    # Call your GPT generation function here using the provided parameters
-                    composed_prompt = f"{prefix} {prompt} {suffix}"
-                    cont =""
-                    stream = model_funct( max_tokens=max_tokens, stop=[stop_token], stream=False,frequency_penalty=frequency_penalty,presence_penalty=presence_penalty ,repeat_penalty=repeat_penalty,temperature=temperature,top_k=top_k,top_p=top_p,model=model_path,prompt=composed_prompt)
-                    cont= [stream["choices"][0]["text"]]
-                    self.temp_prompt  = cont
+                raise ValueError(f"Unsupported model: {model_name}")
         else:
             cont = self.temp_prompt 
         #remove fist 30 characters of cont
@@ -494,33 +401,13 @@ class GPTSampler:
             return {"ui": {"text": " "}, "result": (" ",)}
 
 
-class LlavaClipLoader:
-    @classmethod
-    def INPUT_TYPES(s):
-        return {"required": {               
-                "clip_name": (all_clips_names, ), 
-                             }}
-    
-    RETURN_TYPES = ("LLAVA_CLIP", )
-    RETURN_NAMES = ("llava_clip", )
-    FUNCTION = "load_clip_checkpoint"
-
-    CATEGORY = "N-Suite/LLava"
-    def load_clip_checkpoint(self, clip_name):
-        clip_path = get_model_path(all_llava_clips,clip_name)
-        clip = Llava15ChatHandler(clip_model_path = clip_path, verbose=False)        
-        return (clip, ) 
-
-
 NODE_CLASS_MAPPINGS = {
     "GPT Loader Simple [n-suite]": GPTLoaderSimple,
-    "GPT Sampler [n-suite]": GPTSampler,
-    "Llava Clip Loader [n-suite]": LlavaClipLoader
+    "GPT Sampler [n-suite]": GPTSampler
 }
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
     "GPT Loader Simple [n-suite]": "GPT Loader Simple [🅝-🅢🅤🅘🅣🅔]",
-    "GPT Sampler [n-suite]": "GPT Text Sampler [🅝-🅢🅤🅘🅣🅔]",
-    "Llava Clip Loader [n-suite]": "Llava Clip Loader [🅝-🅢🅤🅘🅣🅔]"
+    "GPT Sampler [n-suite]": "Image Caption Sampler [🅝-🅢🅤🅘🅣🅔]"
 
 }

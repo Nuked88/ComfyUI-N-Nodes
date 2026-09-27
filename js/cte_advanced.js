@@ -98,7 +98,8 @@ app.registerExtension({
 			const styles = this.widgets.find((w) => w.name === "styles");
 			const p_prompt  = this.widgets.find((w) => w.name === "positive_prompt");
 			const n_prompt = this.widgets.find((w) => w.name === "negative_prompt");
-			const cb = nodeData.callback;
+				if (!styles || !p_prompt || !n_prompt) return;
+				const cb = styles.callback;
 			let addedd_positive_prompt = "";
 			let addedd_negative_prompt = "";
 			styles.callback = function () {
@@ -131,7 +132,7 @@ app.registerExtension({
 						
 						if (!ok) {
 							if (styles.value === styles.options.values[0]) {
-								value = styles.options.values[0];
+									styles.value = styles.options.values[0];
 							}
 							styles.value = styles.options.values[index-1];
 

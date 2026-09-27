@@ -1,7 +1,7 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C0C0AJECJ)
 
 # ComfyUI-N-Suite
-A suite of custom nodes for ComfyUI that includes Integer, string and float variable nodes, GPT nodes and video nodes.
+A suite of custom nodes for ComfyUI that includes integer, string and float variable nodes, image-captioning nodes and video nodes.
 
 > [!IMPORTANT]  
 > These nodes were tested primarily in Windows in the default environment provided by ComfyUI and in the environment created by the [notebook](https://github.com/comfyanonymous/ComfyUI/blob/master/notebooks/comfyui_colab.ipynb) for paperspace specifically with the cyberes/gradient-base-py3.10:latest docker image.
@@ -14,21 +14,16 @@ A suite of custom nodes for ComfyUI that includes Integer, string and float vari
 `git clone https://github.com/Nuked88/ComfyUI-N-Nodes.git`  
 to your ComfyUI `custom_nodes` directory
 
-2. ~~IMPORTANT: If you want the GPT nodes on GPU you'll need to run **install_dependency bat files**. 
-There are 2 versions: ***install_dependency_ggml_models.bat*** for the old ggmlv3 models and ***install_dependency_gguf_models.bat*** for all the new models (GGUF).
-YOU CAN ONLY USE ONE OF THEM AT A TIME!
-Since _llama-cpp-python_ needs to be compiled from source code to enable it to use the GPU, you will first need to have [CUDA](https://developer.nvidia.com/cuda-downloads?target_os=Windows&target_arch=x86_64)  and visual studio 2019 or 2022  (in the case of my bat) installed to compile it. For details and the full guide you can go [HERE](https://github.com/abetlen/llama-cpp-python).~~ 
+2. Install it through **ComfyUI Manager** (recommended), which installs the dependencies declared by the project, or run `python -m pip install -r requirements.txt` in ComfyUI's Python environment after a manual clone.
+3. Restart ComfyUI.
 
-3. If you intend to use GPTLoaderSimple with the Moondream model, you'll need to execute the 'install_extra.bat' script, which will install transformers version 4.36.2.
-4. Reboot ComfyUI
+ComfyUI automatically loads all custom scripts and nodes at startup.
 
-In case you need to revert these changes (due to incompatibility with other nodes), you can utilize the 'remove_extra.bat' script.
+> [!IMPORTANT]
+> **Breaking change in 1.2.0:** `llama-cpp-python` integration has been removed because its platform-specific installation was the main source of installation and startup failures. GGUF text-generation models and LLaVA nodes are therefore no longer available in N-Suite. Existing workflows using `Llava Clip Loader` must remove that node; `GPT Loader Simple` and `GPT Sampler` now support only Moondream and JoyTag. N-Suite no longer detects, downloads, or installs `llama-cpp-python`.
 
-ComfyUI will automatically load all custom scripts and nodes at startup.
-
-> [!NOTE]  
-> The llama-cpp-python installation will be done automatically by the script. If you have an NVIDIA GPU NO MORE CUDA BUILD IS NECESSARY thanks to [jllllll](https://github.com/jllllll/llama-cpp-python-cuBLAS-wheels/) repo. I've also dropped the support to GGMLv3 models since all notable models should have switched to the latest version of GGUF by now.
-
+> [!WARNING]
+> **The `Llava Clip Loader` node and the GGUF text-generation path of `GPT Loader Simple` / `GPT Sampler` have been removed.** To keep using those legacy nodes, install the last revision that contains them with `git checkout ae7cc84`. That revision is unsupported and retains the `llama-cpp-python` installation problems; use it in a separate ComfyUI installation or Python environment.
 
 > [!NOTE]  
 > Since 14/02/2024, the node has undergone a massive rewrite, which also led to the change of all node names in order to avoid any conflicts with other extensions in the future (or at least I hope so). Consequently, the old workflows are no longer compatible and will require manual replacement of each node.
@@ -170,114 +165,60 @@ The node-variables are:
 - String
 
 
-## 🤖 GPTLoaderSimple and GPTSampler 🤖
+## 🤖 Image captioning: GPTLoaderSimple and GPTSampler 🤖
 
-These custom nodes are designed to enhance the capabilities of the ConfyUI framework by enabling text generation using GGUF GPT models. This README provides an overview of the two custom nodes and their usage within ConfyUI.
+The legacy node identifiers are retained so existing Moondream and JoyTag workflows continue to load, but these nodes are now limited to image captioning:
 
-You can add in the _extra_model_paths.yaml_ the path where your model GGUF are in this way (example):
+- **Moondream:** its `config.json`, `model.safetensors`, and `tokenizer.json` files are downloaded automatically from the `vikhyatk/moondream1` Hugging Face repository the first time Moondream is loaded.
+- **JoyTag:** its model snapshot is downloaded automatically from the `fancyfeast/joytag` Hugging Face repository the first time JoyTag is loaded.
+- **LLaVA:** was never downloaded automatically. Its GGUF model and projector had to be installed manually; support has now been removed together with `llama-cpp-python`.
 
-`other_ui:
-          base_path: I:\\text-generation-webui
-          GPTcheckpoints: models/`
-          
-Otherwise it will create a GPTcheckpoints folder in the model folder of ComfyUI where you can place your .gguf models.
-
-Two folders have also been created within the 'Llava' directory in the 'GPTcheckpoints' folder for the LLava model:
-
-`clips`: This folder is designated for storing the clips for your LLava models (usually, files that start with **mm** in the repository).
-`models`: This folder is designated for storing the LLava models.
-
-This nodes actually supports 4 different models: 
- - All the GGUF supported by [llama.cpp](https://github.com/ggerganov/llama.cpp) 
- - Llava 
- - Moondream
- - Joytag
-
-
-#### GGUF LLM
-
-The GGUF models can be downloaded from the [Huggingface Hub](https://huggingface.co/models?search=gguf)
-
-[HERE](https://www.youtube.com/watch?v=gzTqXbF0S-w) a video of an example of how to use the GGUF models by [boricuapab](https://github.com/boricuapab)
-
-
-#### Llava
-Here a small list of the models supported by this nodes:
-
-[LlaVa 1.5 7B](https://huggingface.co/mys/ggml_llava-v1.5-7b/)
-[LlaVa 1.5 13B](https://huggingface.co/mys/ggml_llava-v1.5-13b)
-[LlaVa 1.6 Mistral 7B](https://huggingface.co/cjpais/llava-1.6-mistral-7b-gguf/)
-[BakLLaVa](https://huggingface.co/mys/ggml_bakllava-1)
-[Nous Hermes 2 Vision](https://huggingface.co/billborkowski/llava-NousResearch_Nous-Hermes-2-Vision-GGUF)
-
-####Example with Llava model:
-![alt text](./img/image-5.png)
-
-#### Moondream
-The model will be automatically downloaded when you run the first time.
-Anyway, it is available [HERE](https://huggingface.co/vikhyatk/moondream1/tree/main)
-The code taken from [this repository](https://github.com/vikhyat/moondream)
-
-####Example with Moondream model:
-![alt text](./img/image-6.png)
-
-#### Joytag
-The model will be automatically downloaded when you run the first time.
-Anyway, it is available [HERE](https://huggingface.co/fancyfeast/joytag/tree/main)
-The code taken from [this repository](https://github.com/fpgaminer/joytag)
-
-####Example with Joytag model:
-![alt text](./img/image-7.png)
+Downloads happen on first model use, not merely when ComfyUI starts. An internet connection and sufficient disk space are required for that initial load. Models are stored under `ComfyUI/models/GPTcheckpoints/moondream` and `ComfyUI/models/GPTcheckpoints/joytag`.
 
 ### GPTLoaderSimple
 
-![alt text](./img/image11.png)
-
-The `GPTLoaderSimple` node is responsible for loading GPT model checkpoints and creating an instance of the Llama library for text generation. It provides an interface to configure GPU layers, the number of threads, and maximum context for text generation.
-
-
-
-#### Input Fields
-
-- `ckpt_name`: Select the GPT checkpoint name from the available options (joytag and moondream will be automatically downloaded used the first time).
-- `gpu_layers`: Specify the number of GPU layers to use (default: 27).
-- `n_threads`: Specify the number of threads for text generation (default: 8).
-- `max_ctx`: Specify the maximum context length for text generation (default: 2048).
-
-#### Output
-
-The node returns an instance of the Llama library (MODEL) and the path to the loaded checkpoint (STRING).
+`GPTLoaderSimple` loads either Moondream or JoyTag. The `gpu_layers` field is retained for workflow compatibility: set it to `0` for CPU, or to a value greater than zero for GPU. The old `n_threads` and `max_ctx` fields are also retained so saved workflows continue to deserialize, but they do not affect these image-captioning models.
 
 ### GPTSampler
 
-![alt text](./img/image-8.png)
+Connect an image and, for Moondream, a question or instruction in `prompt`. JoyTag uses `max_tags` to limit the number of returned tags. The advanced text-generation controls remain visible for workflow compatibility but no longer apply to GGUF text generation.
 
-The `GPTSampler` node facilitates text generation using GPT models based on the input prompt and various generation parameters. It allows you to control aspects like temperature, top-p sampling, penalties, and more.
+### Why LLaVA was removed
 
+The old LLaVA implementation was not independent: both `Llama` and `Llava15ChatHandler` came from `llama-cpp-python`. Automatically downloading the LLaVA GGUF files would therefore not solve the native-library installation failure. Restoring LLaVA without restoring `llama-cpp-python` requires a new backend (for example Transformers) and a migration path for existing workflows. Such a replacement should download model weights only when the user executes the loader, show the repository and approximate download size, and use the normal Hugging Face cache rather than downloading during N-Suite import.
 
-#### Input Fields
+## Installation and maintenance status
 
-- `prompt`: Enter the input prompt for text generation.
-- `image`: Image input for Joytag, moondream and llava models.
-- `model`: Choose the GPT model to use for text generation.
-- `max_tokens`: Set the maximum number of tokens in the generated text (default: 128).
-- `temperature`: Set the temperature parameter for randomness (default: 0.7).
-- `top_p`: Set the top-p probability for nucleus sampling (default: 0.5).
-- `logprobs`: Specify the number of log probabilities to output (default: 0).
-- `echo`: Enable or disable printing the input prompt alongside the generated text.
-- `stop_token`: Specify the token at which text generation stops.
-- `frequency_penalty`, `presence_penalty`, `repeat_penalty`: Control word generation penalties.
-- `top_k`: Set the top-k tokens to consider during generation (default: 40).
-- `tfs_z`: Set the temperature scaling factor for top frequent samples (default: 1.0).
-- `print_output`: Enable or disable printing the generated text to the console.
-- `cached`: Choose whether to use cached generation (default: NO).
-- `prefix`, `suffix`: Specify text to prepend and append to the prompt.
-- `max_tags`: This only affect the max number of tags generated by joydag.
+N-Suite is published through the Comfy Registry and is installable by current versions of ComfyUI Manager. Dependencies are declared in both `pyproject.toml` and `requirements.txt`; the extension no longer runs `pip install` itself during import. A manual Git installation remains supported, but the user must install `requirements.txt` into the exact Python environment used by ComfyUI.
 
-#### Output
+### Testing this release through Manager Nightly
 
-The node returns the generated text along with a UI-friendly representation.
+ComfyUI Manager's **nightly** entry is the current Git revision from the repository's default branch; it is not a separate version published to the Comfy Registry. Consequently, a pull request cannot be selected as nightly while it is still unmerged. The test flow for this release is:
 
+1. merge the pull request into `main`;
+2. open ComfyUI Manager and select N-Suite's `nightly` version;
+3. restart ComfyUI and validate the nodes and existing workflows;
+4. only after validation, manually run the `Publish to Comfy registry` GitHub Actions workflow to publish version `1.2.0` as stable.
+
+The Registry workflow is deliberately manual: merging a change to `pyproject.toml` no longer publishes an untested stable version automatically. Before the merge, testers can still clone the pull-request branch manually under `custom_nodes`, but Manager will not label that branch as `nightly`.
+
+Practical-RIFE and the Moondream helper remain intentionally separate upstream repositories: their code is **not** copied, merged, or vendored into N-Suite. N-Suite clones each repository into its own directory under `libs/`, as before. To avoid silently running newer upstream code that has not been tested with this suite, each checkout is fixed to a known revision:
+
+- Practical-RIFE: `a8a8035323b1c1a4a20753c751780e5b0a879455` (12 August 2024);
+- N-Suite Moondream helper: `38af98596e59f2a6c25c6b52b2bd5a672dab4144` (29 January 2024);
+- the RIFE 4.7 model archive URL is fixed to DreamingAI revision `572480112b87f9bfbff7579b8a38b483766e455f` instead of the moving `main` branch.
+
+On startup, an existing managed checkout is returned to the corresponding revision. Local changes inside `libs/rifle` or `libs/moondream_repo` must therefore be committed or moved elsewhere before starting ComfyUI; Git deliberately refuses the checkout rather than overwriting them.
+
+### Known open issues checked on 27 September 2026
+
+- [#90](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/90) reports that MoviePy 2.x removed `moviepy.editor`. N-Suite currently uses that API, so dependencies are constrained to `moviepy<2` until the video nodes are migrated.
+- [#87](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/87), [#84](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/84), [#83](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/83), [#63](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/63), and [#56](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/56) report missing nodes or installation/import failures. Declaring all direct Python dependencies and removing runtime `pip` calls addresses part, but not necessarily all, of this group.
+- [#80](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/80), [#79](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/79), and [#75](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/75) are specifically about missing or incompatible `llama_cpp`; version 1.2 removes that failing integration.
+- [#89](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/89) reports creation of an output folder at startup; [#78](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/78), [#62](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/62), [#60](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/60), and [#59](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/59) cover video frame, memory and path handling and remain separate work.
+- [#66](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/66) and [#65](https://github.com/Nuked88/ComfyUI-N-Nodes/issues/65) report frontend compatibility problems. The video previews now use ComfyUI's managed `addDOMWidget` lifecycle, the undefined global from #65 has been removed, and widget removal uses `removeWidget`; further reports should be checked against a current frontend build.
+
+This list is a triage summary, not a claim that the referenced issues are fixed merely by the packaging changes above.
 
 ## Image Pad For Outpainting Advanced 
 ![alt text](./img/image-14.png)
@@ -366,4 +307,3 @@ Feel free to contribute to this project by reporting issues or suggesting improv
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-

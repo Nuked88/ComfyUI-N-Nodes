@@ -162,7 +162,7 @@ The model will be automatically downloaded when you run the first time.Only the 
 Anyway, it is available [HERE](https://huggingface.co/vikhyatk/moondream1/tree/main)
 The code taken from [this repository](https://github.com/vikhyat/moondream)
 
-####Example with Moondream model:
+#### Example with Moondream model:
 ![alt text](./img/image-15.png)
 
 #### Joytag
@@ -170,7 +170,7 @@ The model will be automatically downloaded when you run the first time.Only the 
 Anyway, it is available [HERE](https://huggingface.co/fancyfeast/joytag/tree/main)
 The code taken from [this repository](https://github.com/fpgaminer/joytag)
 
-####Example with Joytag model:
+#### Example with Joytag model:
 ![alt text](./img/image-16.png)
 
 
